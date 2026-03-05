@@ -27,7 +27,9 @@ This document provides core steering instructions for AI Assistants working on t
 - **Current Phase**: Implement a `persistence` adapter using Spring Data JPA (`UserEntity`, `JpaUserRepositoryAdapter`, etc.) that translates between JPA entities and Domain records.
 
 ## 4. Test-Driven Development (TDD) Mandate (CRITICAL)
-- **Test Framework**: You MUST use **JUnit 5** and **Mockito**.
+- **Test Language & Framework**: All Unit Tests MUST be written in **Kotlin**. Production code remains in Java.
+- **Assertions**: You MUST use **Kotest assertions**.
+- **Test Framework**: Use **JUnit 5** as the test runner and **Mockito** for mocking.
 - **Behavioral Testing ONLY**: Testing MUST focus strictly on the *behavior* of the classes. Do NOT write property-based tests or getter/setter tests for simple POJOs/Records.
 - **Test-First Approach**: You MUST write tests BEFORE implementing the production code. The Red-Green-Refactor cycle is non-negotiable.
 - **Repository Testing**: Write `@DataJpaTest` integration tests using **Testcontainers** before creating JPA entities and repository adapters.
