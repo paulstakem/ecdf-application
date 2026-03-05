@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - ECDF">ECDF Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <!-- Google Fonts for Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Common header fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <!-- Main content area -->
+    <main class="container mt-8 mb-8" layout:fragment="content">
+        <p>Loading...</p>
+    </main>
+
+</body>
+</html>

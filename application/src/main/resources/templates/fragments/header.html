@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <header th:fragment="header" class="glass-panel" style="border-radius: 0; border-bottom: 1px solid var(--glass-border); padding: 1.5rem 2rem;">
+        <div class="container flex justify-between items-center" style="padding: 0;">
+            <h1 style="margin-bottom: 0; color: var(--accent-primary); font-size: 1.5rem;">ECDF <span style="color: var(--text-primary); font-weight: 500;">Assessments</span></h1>
+            <nav class="flex gap-4">
+                <a th:href="@{/}" class="btn">Dashboard</a>
+                <a th:href="@{/team}" class="btn">My Team</a>
+                <a th:href="@{/evidence}" class="btn">Evidence Log</a>
+            </nav>
+        </div>
+    </header>
+</body>
+</html>
