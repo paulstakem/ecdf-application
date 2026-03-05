@@ -1,0 +1,31 @@
+# LLM Steering & Technical Directives
+
+This document provides core steering instructions for AI Assistants working on the ECDF Application.
+
+## 1. Execution Workflow (CRITICAL)
+- **Task Boundaries**: The AI MUST stop at the end of every logical task (as defined in `task.md`) and notify the user to wait for explicit human approval before proceeding to the next task.
+- **Do NOT run all steps in one go**. Execute one logical block, verify it compiles and runs, then pause for human review via standard chat or `notify_user`.
+- Before making significant architectural decisions or writing massive amounts of code, confirm the approach with the user.
+
+## 2. Technical Stack & Architecture
+- **Backend Language**: Java 21
+- **Framework**: Spring Boot 3.4.x (Web, Data JPA, Security, Validation, Thymeleaf)
+- **Frontend**: Thymeleaf templates (Server-Side Rendering).
+- **Styling**: Vanilla CSS. Must use a Premium Dark Mode aesthetic with glassmorphism elements and modern typography. No Tailwind.
+- **Database**: PostgreSQL (schema managed via Liquibase).
+- **Testing**: Strict Test-Driven Development (TDD). JUnit 5, Mockito, `@WebMvcTest`, and **Testcontainers** for DB integration tests.
+- **Environment**: 12-Factor App design. Configuration externalized via environment variables. Containerized via standard `Dockerfile`/`Containerfile` and `docker-compose.yml`.
+
+## 3. Workday Integration Strategy (Ports & Adapters)
+- **Goal**: The long-term system of record is **Workday**. The database will eventually be swapped out.
+- **Architecture**: The application MUST follow the **Repository Pattern (Hexagonal / Ports & Adapters architecture)**.
+- **Rule 1**: The Business layer (`@Service`) must only interact with pure Java interface "Ports" (`UserRepository`, `EvidenceRepository`) and pure Java Domain Records/DTOs.
+- **Rule 2**: No DB-specific logic (JPA Annotations, SQL) can leak into the Domain or Service layers.
+- **Current Phase**: Implement a `persistence` adapter using Spring Data JPA (`UserEntity`, `JpaUserRepositoryAdapter`, etc.) that translates between JPA entities and Domain records.
+
+## 4. Test-Driven Development (TDD) Mandate (CRITICAL)
+- **Test-First Approach**: You MUST write tests BEFORE implementing the production code. The Red-Green-Refactor cycle is non-negotiable.
+- **Repository Testing**: Write `@DataJpaTest` integration tests using **Testcontainers** before creating JPA entities and repository adapters.
+- **Service Testing**: Write pure unit tests using JUnit 5 and Mockito (`@ExtendWith(MockitoExtension.class)`) to isolate business logic before implementing `@Service` classes.
+- **Web/Controller Testing**: Write `@WebMvcTest` tests to verify controller routing, mapping, validation, and view selection before implementing the Spring MVC `@Controller`s.
+- **Minimal Code**: Do not write production code unless it is specifically to make a failing test pass. Always ensure tests fail for the right reason before fixing them.
