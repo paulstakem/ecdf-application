@@ -13,9 +13,9 @@
 - [x] Setup core CSS variables and design system (Vanilla CSS, premium dark-mode aesthetic, no Tailwind)
 - [x] Implement Thymeleaf layout shell (Navigation, Header, Main Content area)
 - [x] Configure local file storage path in `application.yml` for Evidence attachments
-- [ ] Create `Containerfile` / `Dockerfile` for the Spring Boot application
-- [ ] Externalize configuration (DB credentials, file storage path) using environment variables
-- [ ] Setup `docker-compose.yml` (for Podman Compose) to orchestrate Postgres, Spring Boot App, and file storage volume
+- [x] Create `Containerfile` / `Dockerfile` for the Spring Boot application
+- [x] Externalize configuration (file storage path) using environment variables
+- [ ] Setup `docker-compose.yml` (for Podman Compose) to orchestrate Spring Boot App and file storage volume
 
 ## 2. Core Domain Models & State (Ports & Adapters)
 
@@ -24,7 +24,7 @@
 - [ ] Create Liquibase migrations for Users, Grades, Expectations, Evidence, Links, Attachments, Assessments, CheckIns, and PDP tables
 - [ ] Define JPA Entities mapping to the Liquibase-created tables
 - [ ] Implement JPA-backed adapters (`JpaUserRepositoryAdapter`, etc.) that implement the Repository interfaces
-- [ ] Write JPA Repository integration tests in **Kotlin using Kotest** and Testcontainers (PostgreSQL)
+- [ ] Write JPA Repository integration tests in **Kotlin using Kotest** and an H2 database
 
 ## 3. Business Logic (Services - Kotlin TDD)
 

@@ -24,7 +24,7 @@ This document provides core steering instructions for AI Assistants working on t
 - **Database**: H2 in-memory database (schema managed via Liquibase).
   - *Critical*: Always initialize an empty master changelog file at `src/main/resources/db/changelog/db.changelog-master.yaml` to prevent Liquibase from failing application startup.
 - **Testing**: Strict Test-Driven Development (TDD). JUnit 5, Mockito, `@WebMvcTest`, and **Testcontainers** for DB integration tests. **JaCoCo** is used for test coverage metrics and is included in the default Gradle task (`.\gradlew`).
-- **Environment**: 12-Factor App design. Configuration externalized via environment variables. Containerized via standard `Dockerfile`/`Containerfile` and `docker-compose.yml`.
+- **Environment**: 12-Factor App design. Configuration externalized via environment variables. Containerized using Azul Zulu JRE 21 via standard `Dockerfile`/`Containerfile` and `docker-compose.yml`. *Note*: The `Dockerfile` should act as a runtime wrapper; the application `.jar` must be built on the host machine before building the container image.
 
 ## 3. Workday Integration Strategy (Ports & Adapters)
 
