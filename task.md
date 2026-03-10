@@ -36,8 +36,8 @@
 - [x] Implement `AssessmentService` to pass tests
 - [x] Write Unit Tests for `CheckInService` (Point-in-time ECDF snapshots, calculating promotion readiness including ITA requirement, handling evidence aging)
 - [x] Implement `CheckInService` to pass tests
-- [ ] Write Unit Tests for `PdpService` (Mandatory creation for underperforming pillars, linking to learning journeys)
-- [ ] Implement `PdpService` to pass tests
+- [x] Write Unit Tests for `PdpService` (Mandatory creation for underperforming pillars, linking to learning journeys)
+- [x] Implement `PdpService` to pass tests
 
 ## 4. UI Layer (Spring MVC Controllers & Views - Kotlin WebMvcTests)
 

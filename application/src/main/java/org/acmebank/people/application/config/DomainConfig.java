@@ -4,11 +4,13 @@ import org.acmebank.people.domain.port.AssessmentRepository;
 import org.acmebank.people.domain.port.CheckInRepository;
 import org.acmebank.people.domain.port.EvidenceRepository;
 import org.acmebank.people.domain.port.GradeRepository;
+import org.acmebank.people.domain.port.PdpItemRepository;
 import org.acmebank.people.domain.port.UserRepository;
 import org.acmebank.people.domain.service.AssessmentService;
 import org.acmebank.people.domain.service.CheckInService;
 import org.acmebank.people.domain.service.EvidenceService;
 import org.acmebank.people.domain.service.GradeService;
+import org.acmebank.people.domain.service.PdpService;
 import org.acmebank.people.domain.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,5 +41,10 @@ public class DomainConfig {
     @Bean
     public CheckInService checkInService(CheckInRepository checkInRepository, EvidenceRepository evidenceRepository, AssessmentRepository assessmentRepository) {
         return new CheckInService(checkInRepository, evidenceRepository, assessmentRepository);
+    }
+
+    @Bean
+    public PdpService pdpService(PdpItemRepository pdpItemRepository) {
+        return new PdpService(pdpItemRepository);
     }
 }
