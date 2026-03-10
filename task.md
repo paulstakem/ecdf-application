@@ -32,8 +32,8 @@
 - [x] Implement `UserService` and `GradeService` to pass tests
 - [x] Write Unit Tests for `EvidenceService` (Handling creation, iterations, and attachments)
 - [x] Implement `EvidenceService` to pass tests
-- [ ] Write Unit Tests for `AssessmentService` (Independent scoring logic, 3rd-party ITA assignments)
-- [ ] Implement `AssessmentService` to pass tests
+- [x] Write Unit Tests for `AssessmentService` (Independent scoring logic, 3rd-party ITA assignments)
+- [x] Implement `AssessmentService` to pass tests
 - [ ] Write Unit Tests for `CheckInService` (Point-in-time ECDF snapshots, calculating promotion readiness including ITA requirement, handling evidence aging)
 - [ ] Implement `CheckInService` to pass tests
 - [ ] Write Unit Tests for `PdpService` (Mandatory creation for underperforming pillars, linking to learning journeys)
