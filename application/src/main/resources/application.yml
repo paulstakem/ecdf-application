@@ -1,3 +1,8 @@
 spring:
   application:
     name: ecdf
+
+app:
+  storage:
+    # Use environment variable if provided, otherwise default to a local ./data directory
+    path: ${FILE_STORAGE_PATH:./data/storage}

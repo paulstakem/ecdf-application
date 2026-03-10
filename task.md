@@ -1,21 +1,24 @@
 # Career Development Assessment Application
 
 ## Planning
+
 - [x] Create initial task.md
 - [x] Refine task list based on `requirements.md` and `agents.md`
 
 ## 1. Foundation & Containerization (12-Factor)
+
 - [x] Initialize Multi-Module Gradle project (Groovy DSL)
 - [x] Create `gradle/libs.versions.toml` for dependency version catalog (Java 21, Spring Boot 3.4.x, Kotlin Test, Kotest, Testcontainers)
 - [x] Setup `application` (Spring Boot Web/UI) and `domain` (Core Business Logic) submodules
 - [x] Setup core CSS variables and design system (Vanilla CSS, premium dark-mode aesthetic, no Tailwind)
 - [x] Implement Thymeleaf layout shell (Navigation, Header, Main Content area)
-- [ ] Configure local file storage path in `application.yml` for Evidence attachments
+- [x] Configure local file storage path in `application.yml` for Evidence attachments
 - [ ] Create `Containerfile` / `Dockerfile` for the Spring Boot application
 - [ ] Externalize configuration (DB credentials, file storage path) using environment variables
 - [ ] Setup `docker-compose.yml` (for Podman Compose) to orchestrate Postgres, Spring Boot App, and file storage volume
 
 ## 2. Core Domain Models & State (Ports & Adapters)
+
 - [ ] Define pure Java Domain Models/DTOs (User, Grade, Pillar, Evidence, Assessment, CheckIn, PdpItem) including Dreyfus 1-5 scale constraints
 - [ ] Define pure Java API Interfaces/Ports for data access (`UserRepository`, `EvidenceRepository`, etc.)
 - [ ] Create Liquibase migrations for Users, Grades, Expectations, Evidence, Links, Attachments, Assessments, CheckIns, and PDP tables
@@ -24,6 +27,7 @@
 - [ ] Write JPA Repository integration tests in **Kotlin using Kotest** and Testcontainers (PostgreSQL)
 
 ## 3. Business Logic (Services - Kotlin TDD)
+
 - [ ] Write Unit Tests (Kotlin/Kotest/Mockito) for `UserService` and `GradeService` (Mocking repository ports)
 - [ ] Implement `UserService` and `GradeService` to pass tests
 - [ ] Write Unit Tests for `EvidenceService` (Handling creation, iterations, and attachments)
@@ -36,10 +40,11 @@
 - [ ] Implement `PdpService` to pass tests
 
 ## 4. UI Layer (Spring MVC Controllers & Views - Kotlin WebMvcTests)
+
 - [ ] Security & Authentication:
   - [ ] Implement basic Spring Security setup
   - [ ] Write Controller tests (Kotlin/MockMvc) and implement `LoginController` and `login.html` view
-- [ ] Dashboard View (Default for all roles): 
+- [ ] Dashboard View (Default for all roles):
   - [ ] Write Controller tests and implement `DashboardController` logic
   - [ ] Implement `dashboard.html` template showing holistic score radar chart (using Chart.js) and recent evidence
 - [ ] Manager Team/Org View:
@@ -59,12 +64,13 @@
 - [ ] Check-In & Period Review (Quarterly):
   - [ ] Write Controller tests and implement `CheckInController`
   - [ ] Implement `checkin-form.html` for Managers to capture review notes and freeze the point-in-time aggregated scores
-- [ ] Developer Pathways & PDP: 
+- [ ] Developer Pathways & PDP:
   - [ ] Write Controller tests and implement `FrameworkController` mapping roles to expected pillar scores
   - [ ] Write Controller tests and implement `PdpController`
   - [ ] Implement `pdp.html` connecting identified gaps to learning journeys
 
 ## 5. Polish & Verification
+
 - [ ] Refine visual design (glassmorphism details, animations, responsive layout)
 - [ ] Perform manual end-to-end verification
 - [ ] Generate `walkthrough.md` documenting implemented flows
