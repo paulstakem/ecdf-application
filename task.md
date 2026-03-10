@@ -28,8 +28,8 @@
 
 ## 3. Business Logic (Services - Kotlin TDD)
 
-- [ ] Write Unit Tests (Kotlin/Kotest/Mockito) for `UserService` and `GradeService` (Mocking repository ports)
-- [ ] Implement `UserService` and `GradeService` to pass tests
+- [x] Write Unit Tests (Kotlin/Kotest/Mockito) for `UserService` and `GradeService` (Mocking repository ports)
+- [x] Implement `UserService` and `GradeService` to pass tests
 - [ ] Write Unit Tests for `EvidenceService` (Handling creation, iterations, and attachments)
 - [ ] Implement `EvidenceService` to pass tests
 - [ ] Write Unit Tests for `AssessmentService` (Independent scoring logic, 3rd-party ITA assignments)

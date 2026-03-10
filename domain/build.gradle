@@ -6,4 +6,10 @@ plugins {
 dependencies {
     testImplementation libs.kotlin.test.junit5
     testImplementation libs.kotest.assertions.core
+    testImplementation libs.mockito.core
+    testImplementation libs.mockito.junit.jupiter
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
