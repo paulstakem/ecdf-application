@@ -14,6 +14,7 @@ import java.util.UUID;
 public class EvidenceEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,13 +24,13 @@ public class EvidenceEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 4000)
     private String impact;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 4000)
     private String complexity;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 4000)
     private String contribution;
 
     @Column(nullable = false, length = 50)

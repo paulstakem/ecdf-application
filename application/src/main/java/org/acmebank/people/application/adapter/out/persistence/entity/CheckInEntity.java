@@ -14,6 +14,7 @@ import java.util.UUID;
 public class CheckInEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,7 +31,7 @@ public class CheckInEntity {
     @Column(name = "period_end_date", nullable = false)
     private LocalDate periodEndDate;
 
-    @Column(name = "manager_notes", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "manager_notes", nullable = false, length = 4000)
     private String managerNotes;
 
     @Column(nullable = false, length = 50)

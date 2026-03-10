@@ -14,6 +14,7 @@ import java.util.UUID;
 public class PdpItemEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,10 +28,10 @@ public class PdpItemEntity {
     @Column(name = "targeted_pillar", nullable = false, length = 50)
     private String targetedPillar;
 
-    @Column(name = "gap_description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "gap_description", nullable = false, length = 4000)
     private String gapDescription;
 
-    @Column(name = "actionable_plan", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "actionable_plan", nullable = false, length = 4000)
     private String actionablePlan;
 
     @Column(name = "learning_journey_link", length = 1000)

@@ -24,17 +24,17 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: impact
-                  type: text
+                  type: varchar(4000)
                   constraints:
                     nullable: false
               - column:
                   name: complexity
-                  type: text
+                  type: varchar(4000)
                   constraints:
                     nullable: false
               - column:
                   name: contribution
-                  type: text
+                  type: varchar(4000)
                   constraints:
                     nullable: false
               - column:

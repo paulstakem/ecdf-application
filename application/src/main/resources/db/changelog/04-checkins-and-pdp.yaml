@@ -34,7 +34,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: manager_notes
-                  type: text
+                  type: varchar(4000)
                   constraints:
                     nullable: false
               - column:
@@ -123,12 +123,12 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: gap_description
-                  type: text
+                  type: varchar(4000)
                   constraints:
                     nullable: false
               - column:
                   name: actionable_plan
-                  type: text
+                  type: varchar(4000)
                   constraints:
                     nullable: false
               - column:

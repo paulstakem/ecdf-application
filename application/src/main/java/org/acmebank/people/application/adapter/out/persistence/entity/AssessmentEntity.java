@@ -14,6 +14,7 @@ import java.util.UUID;
 public class AssessmentEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -24,7 +25,7 @@ public class AssessmentEntity {
     @JoinColumn(name = "assessor_id", nullable = false)
     private UserEntity assessor;
 
-    @Column(name = "review_summary", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "review_summary", nullable = false, length = 4000)
     private String reviewSummary;
 
     @Column(name = "is_third_party", nullable = false)
