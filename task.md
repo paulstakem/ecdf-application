@@ -44,9 +44,9 @@
 - [x] Security & Authentication:
   - [x] Implement basic Spring Security setup
   - [x] Write Controller tests (Kotlin/MockMvc) and implement `LoginController` and `login.html` view
-- [ ] Dashboard View (Default for all roles):
-  - [ ] Write Controller tests and implement `DashboardController` logic
-  - [ ] Implement `dashboard.html` template showing holistic score radar chart (using Chart.js) and recent evidence
+- [x] Dashboard View (Default for all roles):
+  - [x] Write Controller tests and implement `DashboardController` logic
+  - [x] Implement `dashboard.html` template showing holistic score radar chart (using Chart.js) and recent evidence
 - [ ] Manager Team/Org View:
   - [ ] Write Controller tests and implement `TeamController` logic
   - [ ] Implement `team.html` template viewing full reporting hierarchy, grades, and latest Check-In outcomes

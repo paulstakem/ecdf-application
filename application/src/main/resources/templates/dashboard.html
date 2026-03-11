@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
+<head>
+    <title>My Dashboard</title>
+</head>
+<body>
+
+<main layout:fragment="content">
+    
+    <div class="dashboard-header flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold mb-1" th:text="${'Welcome, ' + user.fullName}">Welcome, User</h1>
+            <p class="text-muted" th:text="${user.grade.name}">Grade</p>
+        </div>
+        <div>
+            <a href="/evidence/new" class="btn btn-primary shadow-sm glow-effect">Add Evidence</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Radar Chart Card -->
+        <div class="card glassmorphism p-6">
+            <h2 class="text-xl font-semibold mb-4 text-glow">Holistic Score Profile</h2>
+            <div class="w-full flex justify-center" th:if="${latestCheckIn != null}">
+                <canvas id="scoreRadarChart" style="max-height: 400px;"></canvas>
+            </div>
+            <div th:if="${latestCheckIn == null}" class="text-center p-8 text-muted">
+                <p>No check-in data available yet.</p>
+            </div>
+        </div>
+
+        <!-- Recent Evidence Card -->
+        <div class="card glassmorphism p-6 flex flex-col">
+            <h2 class="text-xl font-semibold mb-4 text-glow">Recent Evidence</h2>
+            
+            <div th:if="${#lists.isEmpty(recentEvidence)}" class="text-center p-8 text-muted">
+                <p>No recent evidence found.</p>
+                <a href="/evidence/new" class="text-primary mt-2 inline-block">Submit your first evidence</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(recentEvidence)}" class="flex-grow flex flex-col gap-4 overflow-y-auto">
+                <div th:each="evidence : ${recentEvidence}" class="evidence-item p-4 rounded-md border border-gray-700 hover:border-primary transition-colors cursor-pointer bg-darker shadow-inner">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium text-lg" th:text="${evidence.title}">Evidence Title</h3>
+                        <span class="badge" th:classappend="${evidence.status.name() == 'DRAFT' ? 'badge-warning' : (evidence.status.name() == 'ASSESSED' ? 'badge-success' : 'badge-info')}" th:text="${evidence.status}">STATUS</span>
+                    </div>
+                    <p class="text-sm text-muted mb-2 line-clamp-2" th:text="${evidence.impact}">Impact description snippet...</p>
+                    <div class="text-xs text-gray-500">
+                        Submitted: <span th:text="${#temporals.format(evidence.createdDate, 'dd MMM yyyy')}">Date</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-right" th:unless="${#lists.isEmpty(recentEvidence)}">
+                <a href="/evidence" class="text-sm text-primary hover:underline glow-text">View all evidence &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js configuration script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" th:if="${latestCheckIn != null}"></script>
+    <script th:if="${latestCheckIn != null}" th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('scoreRadarChart');
+            if(ctx) {
+                const labels = /*[[${radarLabels}]]*/ [];
+                const data = /*[[${radarData}]]*/ [];
+                
+                // Format label names (e.g., KNOWLEDGE_AND_APPLICATION -> Knowledge and Application)
+                const formattedLabels = labels.map(label => {
+                    return label.split('_')
+                                .map(word => word.charAt(0) + word.slice(1).toLowerCase())
+                                .join(' ');
+                });
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: formattedLabels,
+                        datasets: [{
+                            label: 'Current Level',
+                            data: data,
+                            backgroundColor: 'rgba(124, 58, 237, 0.2)', // Violet primary with opacity
+                            borderColor: 'rgba(124, 58, 237, 0.8)', // Violet primary
+                            pointBackgroundColor: 'rgba(167, 139, 250, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(167, 139, 250, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                pointLabels: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        size: 12,
+                                        family: "'Inter', sans-serif"
+                                    }
+                                },
+                                ticks: {
+                                    min: 0,
+                                    max: 5,
+                                    stepSize: 1,
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    backdropColor: 'transparent',
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleFont: {
+                                    family: "'Inter', sans-serif",
+                                    size: 14
+                                },
+                                bodyFont: {
+                                    family: "'Inter', sans-serif",
+                                    size: 13
+                                },
+                                padding: 12,
+                                cornerRadius: 8,
+                                borderColor: 'rgba(124, 58, 237, 0.5)',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</main>
+</body>
+</html>
