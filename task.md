@@ -47,10 +47,10 @@
 - [x] Dashboard View (Default for all roles):
   - [x] Write Controller tests and implement `DashboardController` logic
   - [x] Implement `dashboard.html` template showing holistic score radar chart (using Chart.js) and recent evidence
-- [ ] Manager Team/Org View:
-  - [ ] Write Controller tests and implement `TeamController` logic
-  - [ ] Implement `team.html` template viewing full reporting hierarchy, grades, and latest Check-In outcomes
-  - [ ] Add highlighting for staff with skill gaps and filters to identify "Ready for Promotion" employees
+- [x] Manager Team/Org View:
+  - [x] Write Controller tests and implement `TeamController` logic
+  - [x] Implement `team.html` template viewing full reporting hierarchy, grades, and latest Check-In outcomes
+  - [x] Add highlighting for staff with skill gaps and filters to identify "Ready for Promotion" employees
 - [ ] Evidence Management:
   - [ ] Write Controller tests (including multipart file uploads) and implement `EvidenceController`
   - [ ] Implement `evidence-list.html`

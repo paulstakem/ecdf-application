@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Team Dashboard - ECDF</title>
+    <!-- Simple script for filtering -->
+    <script>
+        function filterTable() {
+            const filter = document.getElementById('filterSelect').value;
+            const rows = document.querySelectorAll('.team-member-row');
+            
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (filter === 'ALL' || status === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 9999px;
+        }
+        .badge-ontrack {
+            background-color: rgba(81, 207, 102, 0.2);
+            color: #51cf66;
+            border: 1px solid rgba(81, 207, 102, 0.4);
+        }
+        .badge-gap {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.4);
+        }
+        .badge-promo {
+            background-color: rgba(51, 154, 240, 0.2);
+            color: #339af0;
+            border: 1px solid rgba(51, 154, 240, 0.4);
+        }
+        .badge-unknown {
+            background-color: rgba(173, 181, 189, 0.2);
+            color: #adb5bd;
+            border: 1px solid rgba(173, 181, 189, 0.4);
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-muted);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+            transition: background-color 0.2s;
+        }
+        
+        .filter-controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        
+        select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        select option {
+            background: #1a1b1e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-12">
+                <section class="glass-panel" style="margin-bottom: 2rem;">
+                    <h2>Team Overview</h2>
+                    <p style="color: var(--text-muted);">View reporting hierarchy and latest check-in outcomes for your team.</p>
+                </section>
+                
+                <section class="glass-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Direct Reports</h3>
+                        <div class="filter-controls">
+                            <label for="filterSelect" style="margin-right: 1rem; color: var(--text-muted);">Filter by Status:</label>
+                            <select id="filterSelect" onchange="filterTable()">
+                                <option value="ALL">All Reports</option>
+                                <option value="READY_FOR_PROMOTION">Ready for Promotion</option>
+                                <option value="UNDERPERFORMING">Skill Gap Identified</option>
+                                <option value="ON_TRACK">On Track</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(teamMembers)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <p>No team members found.</p>
+                    </div>
+                    
+                    <div th:unless="${#lists.isEmpty(teamMembers)}" class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role / Grade</th>
+                                    <th>Latest Check-In</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="member : ${teamMembers}" 
+                                    class="team-member-row" 
+                                    th:attr="data-status=${member.latestCheckIn != null ? member.latestCheckIn.status.name() : 'UNKNOWN'}">
+                                    
+                                    <td>
+                                        <div style="font-weight: 500;" th:text="${member.user.fullName}">Name</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-muted);" th:text="${member.user.email}">Email</div>
+                                    </td>
+                                    
+                                    <td>
+                                        <div th:text="${member.user.grade != null} ? ${member.user.grade.name} : 'Unassigned'">Grade</div>
+                                    </td>
+                                    
+                                    <td>
+                                        <div th:if="${member.latestCheckIn != null}">
+                                            <span th:text="${#temporals.format(member.latestCheckIn.checkInDate, 'MMM dd, yyyy')}">Date</span>
+                                        </div>
+                                        <div th:if="${member.latestCheckIn == null}" style="color: var(--text-muted); font-style: italic;">
+                                            No check-ins yet
+                                        </div>
+                                    </td>
+                                    
+                                    <td>
+                                        <div th:if="${member.latestCheckIn != null}">
+                                            <span th:if="${member.latestCheckIn.status.name() == 'ON_TRACK'}" class="badge badge-ontrack">On Track</span>
+                                            <span th:if="${member.latestCheckIn.status.name() == 'UNDERPERFORMING'}" class="badge badge-gap">Skill Gap</span>
+                                            <span th:if="${member.latestCheckIn.status.name() == 'READY_FOR_PROMOTION'}" class="badge badge-promo">Ready for Promo</span>
+                                        </div>
+                                        <div th:if="${member.latestCheckIn == null}">
+                                            <span class="badge badge-unknown">Pending</span>
+                                        </div>
+                                    </td>
+                                    
+                                    <td>
+                                        <a href="#" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">View Profile</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

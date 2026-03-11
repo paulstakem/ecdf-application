@@ -9,6 +9,7 @@ This document provides core steering instructions for AI Assistants working on t
   - Once a task has completed, you MUST ask a human to review what has been created before moving on.
 - **Do NOT run all steps in one go**. Execute one logical block, verify it compiles and runs, then pause for human review via standard chat or `notify_user`.
 - **Git Commits**: Committing any changes must be a human-in-the-loop activity. Do NOT run `git commit` commands automatically without explicit user approval.
+- **CI/CD Pipeline**: Any code changes committed and pushed to the repository should trigger a GitHub Actions build pipeline. Ensure that GitHub Actions is properly configured (e.g., in `.github/workflows/build.yml`) to automatically build the application, execute all tests, and upload JaCoCo coverage reports on every push and pull request.
 - Before making significant architectural decisions or writing massive amounts of code, confirm the approach with the user.
 
 ## 2. Technical Stack & Architecture
