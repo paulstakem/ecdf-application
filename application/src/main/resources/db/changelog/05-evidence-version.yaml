@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 15-add-version-to-evidence
+      author: ai-assistant
+      changes:
+        - addColumn:
+            tableName: evidence
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false

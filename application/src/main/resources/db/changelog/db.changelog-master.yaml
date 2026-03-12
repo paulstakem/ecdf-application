@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/03-assessments.yaml
   - include:
       file: db/changelog/04-checkins-and-pdp.yaml
+  - include:
+      file: db/changelog/05-evidence-version.yaml
