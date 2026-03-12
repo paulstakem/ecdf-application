@@ -90,6 +90,11 @@ public class DomainPersistenceMapper {
         if (domain == null)
             return null;
         EvidenceEntity entity = new EvidenceEntity();
+        updateEvidenceEntity(entity, domain, userEntity);
+        return entity;
+    }
+
+    public static void updateEvidenceEntity(EvidenceEntity entity, Evidence domain, UserEntity userEntity) {
         entity.setId(domain.id());
         entity.setUser(userEntity);
         entity.setTitle(domain.title());
@@ -99,11 +104,20 @@ public class DomainPersistenceMapper {
         entity.setStatus(domain.status().name());
         entity.setCreatedDate(domain.createdDate());
         entity.setLastModifiedDate(domain.lastModifiedDate());
-        entity.setLinks(
-                domain.links() != null ? new java.util.ArrayList<>(domain.links()) : new java.util.ArrayList<>());
-        entity.setAttachments(domain.attachmentPaths() != null ? new java.util.ArrayList<>(domain.attachmentPaths())
-                : new java.util.ArrayList<>());
+        
+        // Update collections
+        entity.getLinks().clear();
+        if (domain.links() != null) {
+            entity.getLinks().addAll(domain.links());
+        }
+        
+        entity.getAttachments().clear();
+        if (domain.attachmentPaths() != null) {
+            entity.getAttachments().addAll(domain.attachmentPaths());
+        }
 
+        // Update self-assessments - we clear and rebuild to maintain consistency with the map
+        entity.getSelfAssessments().clear();
         if (domain.selfAssessment() != null) {
             domain.selfAssessment().forEach((pillar, score) -> {
                 EvidenceSelfAssessmentEntity sa = new EvidenceSelfAssessmentEntity();
@@ -113,7 +127,6 @@ public class DomainPersistenceMapper {
                 entity.getSelfAssessments().add(sa);
             });
         }
-        return entity;
     }
 
     public static Assessment toDomainAssessment(AssessmentEntity entity) {

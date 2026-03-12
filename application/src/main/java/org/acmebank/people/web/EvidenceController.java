@@ -98,20 +98,39 @@ public class EvidenceController {
         }
 
         User user = resolveUser(principal);
-        Evidence created = evidenceService.createEvidence(user.id(), title);
-
+        
         // Build self-assessment map from submitted scores
         Map<Pillar, Score> selfAssessment = buildSelfAssessment(selectedPillars, request);
 
-        // Update with full details if there's anything extra beyond a stub
+        // Perform creation in a single logical step if possible, 
+        // but since EvidenceService is structured this way, we'll follow its pattern 
+        // but now with corrected entity mapping (no @GeneratedValue)
+        Evidence created = evidenceService.createEvidence(user.id(), title);
+        
+        // If we have additional data, update it
         if (!impact.isBlank() || !complexity.isBlank() || !contribution.isBlank() || !selfAssessment.isEmpty()) {
             created = evidenceService.updateEvidence(
                     created.id(), title, impact, complexity, contribution, selfAssessment);
         }
 
-        // Handle file attachment
+        // Handle file attachment - ensure the path is actually saved to the Evidence object!
         if (attachment != null && !attachment.isEmpty()) {
-            saveAttachment(created.id(), attachment);
+            String savedPath = saveAttachment(created.id(), attachment);
+            if (savedPath != null) {
+                // We need to add this path to the evidence record
+                List<String> paths = new java.util.ArrayList<>(created.attachmentPaths());
+                paths.add(savedPath);
+                
+                // Use the existing service to update with the new list of paths
+                // Note: Evidence record is immutable, so we'd normally use a service method for this.
+                // For now, we utilize the updateEvidence with existing data + new paths if possible,
+                // otherwise we rely on the service to handle it.
+                evidenceRepository.save(new Evidence(
+                    created.id(), created.userId(), created.title(), created.impact(),
+                    created.complexity(), created.contribution(), created.selfAssessment(),
+                    created.links(), paths, created.status(), created.createdDate(), java.time.LocalDate.now()
+                ));
+            }
         }
 
         return "redirect:/evidence";
@@ -275,7 +294,7 @@ public class EvidenceController {
         return result;
     }
 
-    private void saveAttachment(UUID evidenceId, MultipartFile file) {
+    private String saveAttachment(UUID evidenceId, MultipartFile file) {
         try {
             Path dir = Paths.get(storagePath, evidenceId.toString());
             Files.createDirectories(dir);
@@ -283,8 +302,10 @@ public class EvidenceController {
                     ? file.getOriginalFilename() : "upload";
             Path dest = dir.resolve(originalFilename);
             file.transferTo(dest.toFile());
+            return dest.toString().replace("\\", "/"); 
         } catch (IOException e) {
-            // Log and continue — don't fail the whole request for attachment errors
+            // Log and continue
+            return null;
         }
     }
 }
