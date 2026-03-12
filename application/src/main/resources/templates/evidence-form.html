@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
+<head>
+    <title th:text="${evidence != null} ? 'Edit Evidence - ECDF' : 'Capture Evidence - ECDF'">Evidence Form - ECDF</title>
+</head>
+<body>
+
+<section layout:fragment="content">
+
+    <div class="evidence-header flex justify-between items-center mb-6">
+        <div>
+            <a href="/evidence" class="btn-link back-link">&larr; Back to My Evidence</a>
+            <h1 class="mt-2" th:text="${evidence != null} ? 'Edit Evidence' : 'Capture New Evidence'">Capture New Evidence</h1>
+        </div>
+    </div>
+
+    <!-- Error banner -->
+    <div th:if="${error}" class="alert alert-error mb-4" th:text="${error}"></div>
+
+    <form th:action="${evidence != null} ? @{/evidence/{id}/edit(id=${evidence.id()})} : @{/evidence/new}"
+          method="post"
+          enctype="multipart/form-data"
+          class="evidence-form"
+          id="evidence-form">
+
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <!-- ================================================================
+             SECTION 1 — Evidence Details
+             ================================================================ -->
+        <div class="glass-panel p-6 mb-6">
+            <h2 class="section-title mb-5">Evidence Details</h2>
+
+            <!-- Title -->
+            <div class="form-group mb-5">
+                <label for="title" class="form-label">
+                    Evidence Title <span class="required-star">*</span>
+                </label>
+                <input type="text"
+                       id="title"
+                       name="title"
+                       class="form-control"
+                       required
+                       placeholder="e.g. Led migration of monolith to microservices"
+                       th:value="${evidence?.title()}" />
+                <p class="form-hint">A concise title summarising the piece of work or achievement.</p>
+            </div>
+
+            <!-- Impact -->
+            <div class="form-group mb-5">
+                <label for="impact" class="form-label">Impact</label>
+                <textarea id="impact"
+                          name="impact"
+                          class="form-control"
+                          rows="3"
+                          placeholder="What was the business or technical impact? Who benefited and how?"
+                          th:text="${evidence?.impact()}"></textarea>
+                <p class="form-hint">Describe the measurable outcome and who it benefited.</p>
+            </div>
+
+            <!-- Complexity -->
+            <div class="form-group mb-5">
+                <label for="complexity" class="form-label">Complexity</label>
+                <textarea id="complexity"
+                          name="complexity"
+                          class="form-control"
+                          rows="3"
+                          placeholder="What made this work challenging? What obstacles did you navigate?"
+                          th:text="${evidence?.complexity()}"></textarea>
+                <p class="form-hint">Highlight technical difficulty, ambiguity, or scale challenges.</p>
+            </div>
+
+            <!-- Contribution -->
+            <div class="form-group mb-5">
+                <label for="contribution" class="form-label">Contribution</label>
+                <textarea id="contribution"
+                          name="contribution"
+                          class="form-control"
+                          rows="3"
+                          placeholder="What was YOUR specific role? e.g. Sole engineer, tech lead, pair programmer"
+                          th:text="${evidence?.contribution()}"></textarea>
+                <p class="form-hint">Be specific about your personal contribution vs the team's.</p>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             SECTION 2 — Pillar Self-Assessment (Dreyfus 1–5)
+             ================================================================ -->
+        <div class="glass-panel p-6 mb-6">
+            <h2 class="section-title mb-2">Pillar Self-Assessment</h2>
+            <p class="section-subtitle mb-5">
+                Select the ECDF pillars this evidence demonstrates and rate your proficiency
+                on the <strong>Dreyfus scale</strong> (1 = Novice → 5 = Expert).
+            </p>
+
+            <div class="pillar-group">
+                <h3 class="pillar-category-title mb-3">Behavioural Pillars</h3>
+                <div class="pillar-assessment-grid">
+                    <div class="pillar-assessment-card" th:each="pillar : ${pillars}"
+                         th:if="${pillar.name() == 'THINKS' or pillar.name() == 'ENGAGES' or pillar.name() == 'INFLUENCES' or pillar.name() == 'ACHIEVES'}">
+
+                        <!-- Checkbox to select the pillar -->
+                        <div class="pillar-checkbox-row">
+                            <input type="checkbox"
+                                   th:id="${'pillar-' + pillar.name()}"
+                                   name="pillars"
+                                   th:value="${pillar.name()}"
+                                   class="pillar-checkbox"
+                                   th:checked="${evidence != null and evidence.selfAssessment().containsKey(pillar)}"
+                                   th:attr="data-pillar=${pillar.name()}"
+                                   th:aria-label="|Select ${pillar.name()} pillar|" />
+                            <label th:for="${'pillar-' + pillar.name()}" class="pillar-label">
+                                <span class="pillar-tag" th:text="${pillar.name()}">THINKS</span>
+                            </label>
+                        </div>
+
+                        <!-- Dreyfus score selector (1-5) — only active when pillar is checked -->
+                        <div class="dreyfus-selector"
+                             th:id="${'score-group-' + pillar.name()}">
+                            <label class="dreyfus-label-small">Dreyfus Level</label>
+                            <select th:name="${'scores[' + pillar.name() + ']'}"
+                                    class="dreyfus-select form-control-sm"
+                                    th:id="${'score-' + pillar.name()}"
+                                    th:title="|Dreyfus score for ${pillar.name()}|">
+                                <option value="1" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 1}">1 — Novice</option>
+                                <option value="2" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 2}">2 — Advanced Beginner</option>
+                                <option value="3" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 3}" selected="selected">3 — Competent</option>
+                                <option value="4" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 4}">4 — Proficient</option>
+                                <option value="5" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 5}">5 — Expert</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="pillar-category-title mt-6 mb-3">Technical Pillars</h3>
+                <div class="pillar-assessment-grid">
+                    <div class="pillar-assessment-card" th:each="pillar : ${pillars}"
+                         th:if="${pillar.name() == 'DEFINES' or pillar.name() == 'DESIGNS' or pillar.name() == 'DELIVERS' or pillar.name() == 'CONTROLS' or pillar.name() == 'OPERATES'}">
+
+                        <div class="pillar-checkbox-row">
+                            <input type="checkbox"
+                                   th:id="${'pillar-' + pillar.name()}"
+                                   name="pillars"
+                                   th:value="${pillar.name()}"
+                                   class="pillar-checkbox"
+                                   th:checked="${evidence != null and evidence.selfAssessment().containsKey(pillar)}"
+                                   th:attr="data-pillar=${pillar.name()}"
+                                   th:aria-label="|Select ${pillar.name()} pillar|" />
+                            <label th:for="${'pillar-' + pillar.name()}" class="pillar-label">
+                                <span class="pillar-tag" th:text="${pillar.name()}">DEFINES</span>
+                            </label>
+                        </div>
+
+                        <div class="dreyfus-selector"
+                             th:id="${'score-group-' + pillar.name()}">
+                            <label class="dreyfus-label-small">Dreyfus Level</label>
+                            <select th:name="${'scores[' + pillar.name() + ']'}"
+                                    class="dreyfus-select form-control-sm"
+                                    th:id="${'score-' + pillar.name()}"
+                                    th:title="|Dreyfus score for ${pillar.name()}|">
+                                <option value="1" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 1}">1 — Novice</option>
+                                <option value="2" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 2}">2 — Advanced Beginner</option>
+                                <option value="3" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 3}" selected="selected">3 — Competent</option>
+                                <option value="4" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 4}">4 — Proficient</option>
+                                <option value="5" th:selected="${evidence != null and evidence.selfAssessment().containsKey(pillar) and evidence.selfAssessment().get(pillar).value() == 5}">5 — Expert</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             SECTION 3 — File Attachment
+             ================================================================ -->
+        <div class="glass-panel p-6 mb-6">
+            <h2 class="section-title mb-4">Supporting Attachment</h2>
+            <p class="section-subtitle mb-4">
+                Optionally attach a supporting document, log file, or screenshot to strengthen your evidence.
+            </p>
+            <div class="form-group">
+                <label for="attachment" class="form-label">Upload File</label>
+                <div class="file-upload-area" id="file-upload-area">
+                    <input type="file"
+                           id="attachment"
+                           name="attachment"
+                           class="file-input"
+                           accept=".pdf,.txt,.log,.png,.jpg,.jpeg,.doc,.docx" />
+                    <div class="file-upload-prompt">
+                        <span class="upload-icon">📎</span>
+                        <span class="upload-text">Click to upload or drag and drop</span>
+                        <span class="upload-hint">PDF, TXT, LOG, PNG, JPG, DOC (max 10MB)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing attachments when editing -->
+            <div th:if="${evidence != null and !evidence.attachmentPaths().isEmpty()}" class="mt-4">
+                <h3 class="field-label mb-2">Current Attachments</h3>
+                <ul class="attachment-list">
+                    <li th:each="path, iter : ${evidence.attachmentPaths()}">
+                        <a th:href="@{/evidence/{id}/attachment/{i}(id=${evidence.id()}, i=${iter.index})}"
+                           class="attachment-link"
+                           th:text="${#strings.substringAfterLast(path, '/')}">filename.pdf</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             Form Actions
+             ================================================================ -->
+        <div class="form-actions flex justify-end gap-4 mb-8">
+            <a href="/evidence" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary" id="submit-evidence-btn">
+                <span th:text="${evidence != null} ? 'Save Changes' : 'Create Draft'">Create Draft</span>
+            </button>
+        </div>
+
+    </form>
+</section>
+
+<th:block layout:fragment="scripts">
+<script>
+// Toggle dreyfus score selector visibility based on checkbox state
+document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('.pillar-checkbox');
+
+    function updateScoreVisibility(checkbox) {
+        const pillarName = checkbox.dataset.pillar;
+        const scoreGroup = document.getElementById('score-group-' + pillarName);
+        if (scoreGroup) {
+            scoreGroup.style.display = checkbox.checked ? 'block' : 'none';
+        }
+    }
+
+    // Set initial state
+    checkboxes.forEach(function (cb) {
+        updateScoreVisibility(cb);
+        cb.addEventListener('change', function () {
+            updateScoreVisibility(cb);
+        });
+    });
+
+    // File input drag & drop cosmetics
+    const fileInput = document.getElementById('attachment');
+    const uploadArea = document.getElementById('file-upload-area');
+
+    if (fileInput && uploadArea) {
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            if (file) {
+                const prompt = uploadArea.querySelector('.upload-text');
+                if (prompt) prompt.textContent = '📎 ' + file.name;
+            }
+        });
+    }
+});
+</script>
+</th:block>
+
+</body>
+</html>

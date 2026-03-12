@@ -17,7 +17,7 @@ public class EvidenceEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
@@ -42,16 +42,16 @@ public class EvidenceEntity {
     @Column(name = "last_modified_date", nullable = false)
     private LocalDate lastModifiedDate;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "evidence_links", joinColumns = @JoinColumn(name = "evidence_id"))
     @Column(name = "url")
     private java.util.List<String> links = new java.util.ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "evidence_attachments", joinColumns = @JoinColumn(name = "evidence_id"))
     @Column(name = "file_path")
     private java.util.List<String> attachments = new java.util.ArrayList<>();
 
-    @OneToMany(mappedBy = "evidence", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "evidence", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private java.util.List<EvidenceSelfAssessmentEntity> selfAssessments = new java.util.ArrayList<>();
 }

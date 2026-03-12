@@ -10,6 +10,7 @@ import org.acmebank.people.domain.Evidence;
 import org.acmebank.people.domain.EvidenceStatus;
 import org.acmebank.people.domain.port.EvidenceRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,22 +25,26 @@ public class JpaEvidenceRepositoryAdapter implements EvidenceRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
+    @Transactional
     public Evidence save(Evidence evidence) {
         UserEntity userEntity = userJpaRepository.findById(evidence.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + evidence.userId()));
 
         EvidenceEntity entity = DomainPersistenceMapper.toEvidenceEntity(evidence, userEntity);
         EvidenceEntity saved = evidenceJpaRepository.save(entity);
+        evidenceJpaRepository.flush();
         return DomainPersistenceMapper.toDomainEvidence(saved);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Evidence> findById(UUID id) {
         return evidenceJpaRepository.findById(id)
                 .map(DomainPersistenceMapper::toDomainEvidence);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Evidence> findByUserId(UUID userId) {
         return evidenceJpaRepository.findByUserId(userId).stream()
                 .map(DomainPersistenceMapper::toDomainEvidence)
@@ -47,6 +52,7 @@ public class JpaEvidenceRepositoryAdapter implements EvidenceRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Evidence> findByUserIdAndStatus(UUID userId, EvidenceStatus status) {
         return evidenceJpaRepository.findByUserIdAndStatus(userId, status.name()).stream()
                 .map(DomainPersistenceMapper::toDomainEvidence)

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
+<head>
+    <title th:text="'Error ' + ${statusCode} + ' - ECDF'">Error - ECDF</title>
+</head>
+<body>
+
+<section layout:fragment="content">
+
+    <div class="error-page">
+
+        <div class="error-hero glass-panel p-8 mb-6">
+            <div class="error-code" th:text="${statusCode}">500</div>
+            <div class="error-reason" th:text="${statusReason}">Internal Server Error</div>
+            <div class="error-uri">
+                <span class="meta-label">Request URI:</span>
+                <code th:text="${requestUri}">N/A</code>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 mb-4">
+            <h2 class="section-title mb-3">Error Message</h2>
+            <p class="error-message-text" th:text="${errorMessage}">No message available</p>
+        </div>
+
+        <div class="glass-panel p-6 mb-6">
+            <h2 class="section-title mb-3">
+                Exception
+                <span class="exception-class" th:text="${exceptionClass}"></span>
+            </h2>
+            <pre class="stack-trace" th:text="${stackTrace}">No stack trace available</pre>
+        </div>
+
+        <div class="mt-4">
+            <a href="/" class="btn btn-secondary">&larr; Back to Home</a>
+        </div>
+
+    </div>
+
+</section>
+
+<th:block layout:fragment="scripts">
+<style>
+.error-page { max-width: 1000px; margin: 0 auto; }
+
+.error-hero { text-align: center; }
+.error-code {
+    font-size: 6rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+.error-reason {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+.error-uri {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.error-uri code {
+    background: rgba(255,255,255,0.05);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    color: var(--accent-primary);
+}
+.error-message-text {
+    color: #ff6b6b;
+    font-size: 1.05rem;
+    font-family: monospace;
+    word-break: break-word;
+}
+.exception-class {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--accent-primary);
+    font-weight: normal;
+    margin-left: 0.5rem;
+}
+.stack-trace {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 600px;
+    overflow-y: auto;
+}
+</style>
+</th:block>
+
+</body>
+</html>

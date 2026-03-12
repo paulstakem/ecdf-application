@@ -1,0 +1,290 @@
+package org.acmebank.people.web;
+
+import org.acmebank.people.domain.Evidence;
+import org.acmebank.people.domain.EvidenceStatus;
+import org.acmebank.people.domain.Pillar;
+import org.acmebank.people.domain.Score;
+import org.acmebank.people.domain.User;
+import org.acmebank.people.domain.port.EvidenceRepository;
+import org.acmebank.people.domain.port.UserRepository;
+import org.acmebank.people.domain.service.EvidenceService;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Principal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+@Controller
+@RequestMapping("/evidence")
+public class EvidenceController {
+
+    private final UserRepository userRepository;
+    private final EvidenceRepository evidenceRepository;
+    private final EvidenceService evidenceService;
+    private final String storagePath;
+
+    public EvidenceController(
+            UserRepository userRepository,
+            EvidenceRepository evidenceRepository,
+            EvidenceService evidenceService,
+            @Value("${app.storage.path:./data/storage}") String storagePath) {
+        this.userRepository = userRepository;
+        this.evidenceRepository = evidenceRepository;
+        this.evidenceService = evidenceService;
+        this.storagePath = storagePath;
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence — list evidence for the logged-in user
+    // -------------------------------------------------------------------------
+    @GetMapping
+    public String listEvidence(Principal principal, Model model) {
+        User user = resolveUser(principal);
+        List<Evidence> evidenceList = evidenceRepository.findByUserId(user.id());
+        model.addAttribute("evidenceList", evidenceList);
+        return "evidence-list";
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/new — show create form
+    // -------------------------------------------------------------------------
+    @GetMapping("/new")
+    public String newEvidenceForm(Model model) {
+        model.addAttribute("pillars", Pillar.values());
+        return "evidence-form";
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /evidence/new — submit create form (multipart)
+    // -------------------------------------------------------------------------
+    @PostMapping("/new")
+    public String createEvidence(
+            Principal principal,
+            HttpServletRequest request,
+            @RequestParam("title") String title,
+            @RequestParam(value = "impact", defaultValue = "") String impact,
+            @RequestParam(value = "complexity", defaultValue = "") String complexity,
+            @RequestParam(value = "contribution", defaultValue = "") String contribution,
+            @RequestParam(value = "pillars", required = false) List<String> selectedPillars,
+            @RequestParam(value = "attachment", required = false) MultipartFile attachment,
+            Model model) {
+
+        if (title == null || title.isBlank()) {
+            model.addAttribute("pillars", Pillar.values());
+            model.addAttribute("error", "Title is required.");
+            return "evidence-form";
+        }
+
+        User user = resolveUser(principal);
+        Evidence created = evidenceService.createEvidence(user.id(), title);
+
+        // Build self-assessment map from submitted scores
+        Map<Pillar, Score> selfAssessment = buildSelfAssessment(selectedPillars, request);
+
+        // Update with full details if there's anything extra beyond a stub
+        if (!impact.isBlank() || !complexity.isBlank() || !contribution.isBlank() || !selfAssessment.isEmpty()) {
+            created = evidenceService.updateEvidence(
+                    created.id(), title, impact, complexity, contribution, selfAssessment);
+        }
+
+        // Handle file attachment
+        if (attachment != null && !attachment.isEmpty()) {
+            saveAttachment(created.id(), attachment);
+        }
+
+        return "redirect:/evidence";
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/{id} — view single evidence detail
+    // -------------------------------------------------------------------------
+    @GetMapping("/{id}")
+    public String viewEvidence(
+            @PathVariable("id") UUID id,
+            Principal principal,
+            Model model) {
+
+        User user = resolveUser(principal);
+        Evidence evidence = evidenceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
+
+        if (!evidence.userId().equals(user.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        model.addAttribute("evidence", evidence);
+        model.addAttribute("pillars", Pillar.values());
+        return "evidence-detail";
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/{id}/edit — show edit form for DRAFT evidence
+    // -------------------------------------------------------------------------
+    @GetMapping("/{id}/edit")
+    public String editEvidenceForm(
+            @PathVariable("id") UUID id,
+            Principal principal,
+            Model model) {
+
+        User user = resolveUser(principal);
+        Evidence evidence = evidenceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
+
+        if (!evidence.userId().equals(user.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        if (evidence.status() != EvidenceStatus.DRAFT) {
+            return "redirect:/evidence";
+        }
+
+        model.addAttribute("evidence", evidence);
+        model.addAttribute("pillars", Pillar.values());
+        return "evidence-form";
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /evidence/{id}/edit — submit edit form for DRAFT evidence
+    // -------------------------------------------------------------------------
+    @PostMapping("/{id}/edit")
+    public String updateEvidence(
+            @PathVariable("id") UUID id,
+            Principal principal,
+            HttpServletRequest request,
+            @RequestParam("title") String title,
+            @RequestParam(value = "impact", defaultValue = "") String impact,
+            @RequestParam(value = "complexity", defaultValue = "") String complexity,
+            @RequestParam(value = "contribution", defaultValue = "") String contribution,
+            @RequestParam(value = "pillars", required = false) List<String> selectedPillars,
+            @RequestParam(value = "attachment", required = false) MultipartFile attachment,
+            Model model) {
+
+        User user = resolveUser(principal);
+        Evidence evidence = evidenceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
+
+        if (!evidence.userId().equals(user.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        if (title == null || title.isBlank()) {
+            model.addAttribute("evidence", evidence);
+            model.addAttribute("pillars", Pillar.values());
+            model.addAttribute("error", "Title is required.");
+            return "evidence-form";
+        }
+
+        Map<Pillar, Score> selfAssessment = buildSelfAssessment(selectedPillars, request);
+        evidenceService.updateEvidence(id, title, impact, complexity, contribution, selfAssessment);
+
+        if (attachment != null && !attachment.isEmpty()) {
+            saveAttachment(id, attachment);
+        }
+
+        return "redirect:/evidence";
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/{id}/attachment/{index} — secure file download
+    // -------------------------------------------------------------------------
+    @GetMapping("/{id}/attachment/{index}")
+    public ResponseEntity<byte[]> downloadAttachment(
+            @PathVariable("id") UUID id,
+            @PathVariable("index") int index,
+            Principal principal) {
+
+        User user = resolveUser(principal);
+        Evidence evidence = evidenceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
+
+        if (!evidence.userId().equals(user.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        List<String> attachments = evidence.attachmentPaths();
+        if (attachments == null || index < 0 || index >= attachments.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attachment not found");
+        }
+
+        try {
+            Path filePath = Paths.get(attachments.get(index));
+            byte[] content = Files.readAllBytes(filePath);
+            String filename = filePath.getFileName().toString();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(content);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attachment file not found on server");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private User resolveUser(Principal principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private Map<Pillar, Score> buildSelfAssessment(List<String> selectedPillars, HttpServletRequest request) {
+        if (selectedPillars == null || selectedPillars.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Pillar, Score> result = new HashMap<>();
+        for (String pillarName : selectedPillars) {
+            try {
+                Pillar pillar = Pillar.valueOf(pillarName.toUpperCase());
+                String scoreKey = "scores[" + pillarName + "]";
+                String scoreStr = request.getParameter(scoreKey);
+                if (scoreStr != null && !scoreStr.isBlank()) {
+                    int scoreVal = Integer.parseInt(scoreStr);
+                    result.put(pillar, new Score(scoreVal));
+                }
+            } catch (IllegalArgumentException ignored) {
+                // skip invalid pillar names or out-of-range scores
+            }
+        }
+        return result;
+    }
+
+    private void saveAttachment(UUID evidenceId, MultipartFile file) {
+        try {
+            Path dir = Paths.get(storagePath, evidenceId.toString());
+            Files.createDirectories(dir);
+            String originalFilename = file.getOriginalFilename() != null
+                    ? file.getOriginalFilename() : "upload";
+            Path dest = dir.resolve(originalFilename);
+            file.transferTo(dest.toFile());
+        } catch (IOException e) {
+            // Log and continue — don't fail the whole request for attachment errors
+        }
+    }
+}

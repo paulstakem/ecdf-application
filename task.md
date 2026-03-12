@@ -51,11 +51,11 @@
   - [x] Write Controller tests and implement `TeamController` logic
   - [x] Implement `team.html` template viewing full reporting hierarchy, grades, and latest Check-In outcomes
   - [x] Add highlighting for staff with skill gaps and filters to identify "Ready for Promotion" employees
-- [ ] Evidence Management:
-  - [ ] Write Controller tests (including multipart file uploads) and implement `EvidenceController`
-  - [ ] Implement `evidence-list.html`
-  - [ ] Implement `evidence-form.html` (Engineers select applicable pillars and self-rate; provide Impact, Complexity, Contribution)
-  - [ ] Implement secure file download endpoint for attachments
+- [x] Evidence Management:
+  - [x] Write Controller tests (including multipart file uploads) and implement `EvidenceController`
+  - [x] Implement `evidence-list.html`
+  - [x] Implement `evidence-form.html` (Engineers select applicable pillars and self-rate; provide Impact, Complexity, Contribution)
+  - [x] Implement secure file download endpoint for attachments
 - [ ] Evidence Assessment & 3rd-Party Workflow:
   - [ ] Write Controller tests and implement `AssessmentController`
   - [ ] Implement `assessment-form.html` (for Managers/ITAs) with independent pillar scoring and Review Summary

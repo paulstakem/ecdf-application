@@ -1,0 +1,255 @@
+package org.acmebank.people.web
+
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.nulls.shouldNotBeNull
+import org.acmebank.people.domain.Evidence
+import org.acmebank.people.domain.EvidenceStatus
+import org.acmebank.people.domain.Pillar
+import org.acmebank.people.domain.Score
+import org.acmebank.people.domain.User
+import org.acmebank.people.domain.Grade
+import org.acmebank.people.domain.port.UserRepository
+import org.acmebank.people.domain.port.EvidenceRepository
+import org.acmebank.people.domain.service.EvidenceService
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito.any
+import org.mockito.Mockito.`when`
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration
+import org.springframework.context.annotation.Import
+import org.springframework.http.MediaType
+import org.springframework.http.HttpHeaders
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.model
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import java.time.LocalDate
+import java.util.Optional
+import java.util.UUID
+
+@WebMvcTest(EvidenceController::class)
+@Import(ThymeleafAutoConfiguration::class)
+class EvidenceControllerTest {
+
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+
+    @MockitoBean
+    private lateinit var userRepository: UserRepository
+
+    @MockitoBean
+    private lateinit var evidenceRepository: EvidenceRepository
+
+    @MockitoBean
+    private lateinit var evidenceService: EvidenceService
+
+    private val userId = UUID.randomUUID()
+    private val evidenceId = UUID.randomUUID()
+
+    private val mockUser = User(
+        userId, "user@example.com", "Engineer Bob",
+        Grade(UUID.randomUUID(), "Software Engineer", "Engineering", emptyMap()),
+        null, false
+    )
+
+    private val mockEvidence = Evidence(
+        evidenceId, userId, "Project X Refactor", "High Impact", "Complex", "Led effort",
+        mapOf(Pillar.DEFINES to Score(3), Pillar.DELIVERS to Score(4)),
+        emptyList(), emptyList(), EvidenceStatus.DRAFT, LocalDate.now(), LocalDate.now()
+    )
+
+    // -------------------------------------------------------------------------
+    // GET /evidence — list
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should return evidence list view and populate model on success`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findByUserId(userId)).thenReturn(listOf(mockEvidence))
+
+        mockMvc.perform(get("/evidence"))
+            .andExpect(status().isOk)
+            .andExpect(view().name("evidence-list"))
+            .andExpect(model().attributeExists("evidenceList"))
+            .andDo { result ->
+                val modelAndView = result.modelAndView
+                modelAndView.shouldNotBeNull()
+                modelAndView.model["evidenceList"] shouldBe listOf(mockEvidence)
+            }
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/new — show create form
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should show create evidence form with pillars in model`() {
+        mockMvc.perform(get("/evidence/new"))
+            .andExpect(status().isOk)
+            .andExpect(view().name("evidence-form"))
+            .andExpect(model().attributeExists("pillars"))
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /evidence/new — submit create form
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should create evidence from multipart form and redirect to list`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceService.createEvidence(any(UUID::class.java), any(String::class.java))).thenReturn(mockEvidence)
+        `when`(evidenceService.updateEvidence(any(UUID::class.java), any(String::class.java), any(String::class.java), any(String::class.java), any(String::class.java), any())).thenReturn(mockEvidence)
+
+        val attachment = MockMultipartFile(
+            "attachment", "evidence.txt", MediaType.TEXT_PLAIN_VALUE, "some content".toByteArray()
+        )
+
+        mockMvc.perform(
+            multipart("/evidence/new")
+                .file(attachment)
+                .param("title", "Project X Refactor")
+                .param("impact", "High Impact")
+                .param("complexity", "Complex")
+                .param("contribution", "Led effort")
+                .param("pillars", "DEFINES", "DELIVERS")
+                .param("scores[DEFINES]", "3")
+                .param("scores[DELIVERS]", "4")
+                .with(csrf())
+        )
+            .andExpect(status().is3xxRedirection)
+            .andExpect(redirectedUrl("/evidence"))
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should reject create form when title is blank`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+
+        mockMvc.perform(
+            multipart("/evidence/new")
+                .param("title", "")
+                .param("impact", "Some impact")
+                .param("complexity", "Low")
+                .param("contribution", "Helped")
+                .with(csrf())
+        )
+            .andExpect(status().isOk)
+            .andExpect(view().name("evidence-form"))
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/{id} — view single evidence
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should show evidence detail view`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
+
+        mockMvc.perform(get("/evidence/$evidenceId"))
+            .andExpect(status().isOk)
+            .andExpect(view().name("evidence-detail"))
+            .andExpect(model().attributeExists("evidence"))
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should return 404 when evidence not found`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(any(UUID::class.java))).thenReturn(Optional.empty())
+
+        mockMvc.perform(get("/evidence/$evidenceId"))
+            .andExpect(status().isNotFound)
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/{id}/edit — show edit form
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should show edit form for DRAFT evidence`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
+
+        mockMvc.perform(get("/evidence/$evidenceId/edit"))
+            .andExpect(status().isOk)
+            .andExpect(view().name("evidence-form"))
+            .andExpect(model().attributeExists("evidence", "pillars"))
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should redirect when trying to edit non-DRAFT evidence`() {
+        val submittedEvidence = Evidence(
+            evidenceId, userId, "Project X Refactor", "High Impact", "Complex", "Led effort",
+            mapOf(Pillar.DEFINES to Score(3)), emptyList(), emptyList(),
+            EvidenceStatus.SUBMITTED, LocalDate.now(), LocalDate.now()
+        )
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(submittedEvidence))
+
+        mockMvc.perform(get("/evidence/$evidenceId/edit"))
+            .andExpect(status().is3xxRedirection)
+            .andExpect(redirectedUrl("/evidence"))
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /evidence/{id}/edit — submit edit form
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should update DRAFT evidence and redirect to list`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
+        `when`(evidenceService.updateEvidence(any(), any(), any(), any(), any(), any())).thenReturn(mockEvidence)
+
+        val attachment = MockMultipartFile(
+            "attachment", "", MediaType.TEXT_PLAIN_VALUE, ByteArray(0)
+        )
+
+        // POST to edit endpoint using HTTP method override since multipart uses POST
+        mockMvc.perform(
+            multipart("/evidence/$evidenceId/edit")
+                .file(attachment)
+                .param("title", "Updated Title")
+                .param("impact", "Updated Impact")
+                .param("complexity", "Low")
+                .param("contribution", "Pair programmed")
+                .param("pillars", "DEFINES")
+                .param("scores[DEFINES]", "2")
+                .with(csrf())
+        )
+            .andExpect(status().is3xxRedirection)
+            .andExpect(redirectedUrl("/evidence"))
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /evidence/{id}/attachment — secure file download
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should return 404 for download when evidence has no attachments`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
+
+        mockMvc.perform(get("/evidence/$evidenceId/attachment/0"))
+            .andExpect(status().isNotFound)
+    }
+}

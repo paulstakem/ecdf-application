@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
+<head>
+    <title>Evidence - ECDF</title>
+</head>
+<body>
+
+<section layout:fragment="content">
+    <div class="evidence-header flex justify-between items-center mb-6">
+        <h1>My Evidence</h1>
+        <a href="/evidence/new" class="btn btn-primary">Create New Evidence</a>
+    </div>
+
+    <div class="evidence-list-container glass-panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date Added</th>
+                    <th>Status</th>
+                    <th>Pillars Covered</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="evidence : ${evidenceList}">
+                    <td th:text="${evidence.title()}">Frontend Refactor</td>
+                    <td th:text="${#temporals.format(evidence.createdDate(), 'MMM dd, yyyy')}">Oct 12, 2025</td>
+                    <td>
+                        <span class="status-badge" 
+                              th:classappend="${'status-' + #strings.toLowerCase(evidence.status())}"
+                              th:text="${evidence.status()}">DRAFT</span>
+                    </td>
+                    <td>
+                        <div class="tag-group">
+                            <span class="tag" th:each="entry : ${evidence.selfAssessment()}" 
+                                  th:text="${entry.key.name()} + ' (' + ${entry.value.value()} + ')'">
+                                SECURES (4)
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <a th:href="@{/evidence/{id}(id=${evidence.id()})}" class="btn-link">View</a>
+                        <a th:if="${evidence.status().name() == 'DRAFT'}" th:href="@{/evidence/{id}/edit(id=${evidence.id()})}" class="btn-link">Edit</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(evidenceList)}">
+                    <td colspan="5" class="text-center p-4">No evidence found. Start capturing your achievements!</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+</body>
+</html>

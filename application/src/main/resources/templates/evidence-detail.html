@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
+<head>
+    <title th:text="${evidence.title()} + ' - Evidence - ECDF'">Evidence Detail - ECDF</title>
+</head>
+<body>
+
+<section layout:fragment="content">
+
+    <div class="evidence-header flex justify-between items-center mb-6">
+        <div>
+            <a href="/evidence" class="btn-link back-link">&larr; Back to My Evidence</a>
+            <h1 class="mt-2" th:text="${evidence.title()}">Evidence Title</h1>
+        </div>
+        <div class="action-group flex gap-3">
+            <a th:if="${evidence.status().name() == 'DRAFT'}"
+               th:href="@{/evidence/{id}/edit(id=${evidence.id()})}"
+               class="btn btn-secondary">Edit</a>
+        </div>
+    </div>
+
+    <!-- Status & Metadata -->
+    <div class="glass-panel p-6 mb-6">
+        <div class="detail-meta grid-3-col">
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="status-badge"
+                      th:classappend="${'status-' + #strings.toLowerCase(evidence.status())}"
+                      th:text="${evidence.status()}">DRAFT</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Date Added</span>
+                <span class="meta-value"
+                      th:text="${#temporals.format(evidence.createdDate(), 'MMMM dd, yyyy')}">March 12, 2026</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Last Updated</span>
+                <span class="meta-value"
+                      th:text="${#temporals.format(evidence.lastModifiedDate(), 'MMMM dd, yyyy')}">March 12, 2026</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact, Complexity, Contribution -->
+    <div class="glass-panel p-6 mb-6">
+        <h2 class="section-title mb-4">Evidence Details</h2>
+        <div class="detail-fields">
+            <div class="detail-field mb-4">
+                <h3 class="field-label">Impact</h3>
+                <p class="field-value" th:text="${evidence.impact()}">Description of impact...</p>
+            </div>
+            <div class="detail-field mb-4">
+                <h3 class="field-label">Complexity</h3>
+                <p class="field-value" th:text="${evidence.complexity()}">Description of complexity...</p>
+            </div>
+            <div class="detail-field mb-4">
+                <h3 class="field-label">Contribution</h3>
+                <p class="field-value" th:text="${evidence.contribution()}">Description of contribution...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Self Assessment -->
+    <div class="glass-panel p-6 mb-6">
+        <h2 class="section-title mb-4">Self Assessment</h2>
+        <div th:if="${evidence.selfAssessment().isEmpty()}" class="empty-state-inline">
+            <p>No pillar self-assessment recorded yet.</p>
+        </div>
+        <div th:unless="${evidence.selfAssessment().isEmpty()}" class="pillar-assessment-grid">
+            <div class="pillar-score-card" th:each="entry : ${evidence.selfAssessment()}">
+                <div class="pillar-name" th:text="${entry.key.name()}">DEFINES</div>
+                <div class="dreyfus-score">
+                    <div class="score-display">
+                        <span class="score-value" th:text="${entry.value.value()}">3</span>
+                        <span class="score-max">/5</span>
+                    </div>
+                    <div class="score-dots">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}"
+                              class="score-dot"
+                              th:classappend="${i <= entry.value.value()} ? ' filled' : ''"></span>
+                    </div>
+                </div>
+                <div class="dreyfus-label" th:switch="${entry.value.value()}">
+                    <span th:case="1">Novice</span>
+                    <span th:case="2">Advanced Beginner</span>
+                    <span th:case="3">Competent</span>
+                    <span th:case="4">Proficient</span>
+                    <span th:case="5">Expert</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attachments -->
+    <div class="glass-panel p-6 mb-6" th:if="${!evidence.attachmentPaths().isEmpty()}">
+        <h2 class="section-title mb-4">Attachments</h2>
+        <ul class="attachment-list">
+            <li th:each="path, iter : ${evidence.attachmentPaths()}">
+                <a th:href="@{/evidence/{id}/attachment/{i}(id=${evidence.id()}, i=${iter.index})}"
+                   class="attachment-link"
+                   th:text="${#strings.substringAfterLast(path, '/')}">filename.pdf</a>
+            </li>
+        </ul>
+    </div>
+
+</section>
+
+</body>
+</html>
