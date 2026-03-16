@@ -1,15 +1,219 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
 <head>
-    <title>Assessment Form - ECDF</title>
+    <title>Assess Evidence - ECDF</title>
 </head>
 <body>
-<div layout:fragment="content">
-    <div class="glass-panel">
-        <h1 class="premium-title">Evidence Assessment</h1>
-        <p>Placeholder for assessment form.</p>
+
+<section layout:fragment="content">
+
+    <div class="evidence-header flex justify-between items-center mb-6">
+        <div>
+            <a href="/assessment/queue" class="btn-link back-link">&larr; Back to Assessment Queue</a>
+            <h1 class="mt-2">Assess Evidence</h1>
+        </div>
     </div>
-</div>
+
+    <!-- Error banner -->
+    <div th:if="${error}" class="alert alert-error mb-4" th:text="${error}"></div>
+
+    <div class="assessment-container grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Evidence Details (Read-only) -->
+        <div class="lg:col-span-1">
+            <div class="glass-panel p-6 sticky top-8">
+                <h2 class="section-title mb-4">Evidence Context</h2>
+                
+                <div class="developer-info mb-6 p-4 bg-opacity-20 bg-blue-900 rounded-lg">
+                    <label class="field-label-small">Developer</label>
+                    <p class="font-bold text-lg" th:text="${developer.fullName()}">Jane Dev</p>
+                    <p class="text-sm opacity-70" th:text="${developer.email()}">jane@acme.com</p>
+                    <p class="text-sm opacity-70" th:text="${developer.grade() != null ? developer.grade().name() : 'Unknown Grade'}">Senior Engineer</p>
+                </div>
+
+                <div class="detail-group mb-5">
+                    <label class="field-label-small">Evidence Title</label>
+                    <p class="font-medium" th:text="${evidence.title()}">Project Title</p>
+                </div>
+
+                <div class="detail-group mb-5">
+                    <label class="field-label-small">Impact</label>
+                    <p class="text-sm whitespace-pre-wrap" th:text="${!#strings.isEmpty(evidence.impact()) ? evidence.impact() : 'No impact description provided.'}">Impact content</p>
+                </div>
+
+                <div class="detail-group mb-5">
+                    <label class="field-label-small">Complexity</label>
+                    <p class="text-sm whitespace-pre-wrap" th:text="${!#strings.isEmpty(evidence.complexity()) ? evidence.complexity() : 'No complexity description provided.'}">Complexity content</p>
+                </div>
+
+                <div class="detail-group mb-5">
+                    <label class="field-label-small">Contribution</label>
+                    <p class="text-sm whitespace-pre-wrap" th:text="${!#strings.isEmpty(evidence.contribution()) ? evidence.contribution() : 'No contribution description provided.'}">Contribution content</p>
+                </div>
+
+                <div th:if="${!evidence.attachmentPaths().isEmpty()}" class="mt-4 pt-4 border-t border-white border-opacity-10">
+                    <h3 class="field-label-small mb-2">Attachments</h3>
+                    <ul class="attachment-list">
+                        <li th:each="path, iter : ${evidence.attachmentPaths()}">
+                            <a th:href="@{/evidence/{id}/attachment/{i}(id=${evidence.id()}, i=${iter.index})}"
+                               class="attachment-link text-sm"
+                               th:text="${#strings.substringAfterLast(path, '/')}">filename.pdf</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Assessment Form -->
+        <div class="lg:col-span-2">
+            <form th:action="@{/assessment/{id}(id=${evidence.id()})}"
+                  method="post"
+                  class="assessment-form">
+
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <!-- Pillar Scoring -->
+                <div class="glass-panel p-6 mb-6">
+                    <h2 class="section-title mb-2">Assessor Pillar Scoring</h2>
+                    <p class="section-subtitle mb-5">
+                        Provide independent scoring for the pillars demonstrated in this evidence.
+                    </p>
+
+                    <div class="pillar-group">
+                        <h3 class="pillar-category-title mb-3">Behavioural Pillars</h3>
+                        <div class="pillar-assessment-grid">
+                            <div class="pillar-assessment-card" th:each="pillar : ${pillars}"
+                                 th:if="${pillar.name() == 'THINKS' or pillar.name() == 'ENGAGES' or pillar.name() == 'INFLUENCES' or pillar.name() == 'ACHIEVES'}">
+                                
+                                <div class="pillar-checkbox-row">
+                                    <input type="checkbox"
+                                           th:id="${'pillar-' + pillar.name()}"
+                                           name="pillars"
+                                           th:value="${pillar.name()}"
+                                           class="pillar-checkbox"
+                                           th:checked="${evidence.selfAssessment().containsKey(pillar)}"
+                                           th:attr="data-pillar=${pillar.name()}"
+                                           th:aria-label="|Select ${pillar.name()} for assessment|" />
+                                    <label th:for="${'pillar-' + pillar.name()}" class="pillar-label">
+                                        <span class="pillar-tag" th:text="${pillar.name()}">THINKS</span>
+                                    </label>
+                                </div>
+
+                                <div class="dreyfus-selector" th:id="${'score-group-' + pillar.name()}">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="dreyfus-label-small">Assessor Score</label>
+                                        <span th:if="${evidence.selfAssessment().containsKey(pillar)}" 
+                                              class="text-xs opacity-60" 
+                                              th:text="'Self-Rated: ' + ${evidence.selfAssessment().get(pillar).value()}">Self: 3</span>
+                                    </div>
+                                    <select th:name="${'scores[' + pillar.name() + ']'}"
+                                            class="dreyfus-select form-control-sm"
+                                            th:id="${'score-' + pillar.name()}"
+                                            th:title="|Assessment score for ${pillar.name()}|">
+                                        <option value="1">1 — Novice</option>
+                                        <option value="2">2 — Advanced Beginner</option>
+                                        <option value="3" selected>3 — Competent</option>
+                                        <option value="4">4 — Proficient</option>
+                                        <option value="5">5 — Expert</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="pillar-category-title mt-6 mb-3">Technical Pillars</h3>
+                        <div class="pillar-assessment-grid">
+                            <div class="pillar-assessment-card" th:each="pillar : ${pillars}"
+                                 th:if="${pillar.name() == 'DEFINES' or pillar.name() == 'DESIGNS' or pillar.name() == 'DELIVERS' or pillar.name() == 'CONTROLS' or pillar.name() == 'OPERATES'}">
+                                
+                                <div class="pillar-checkbox-row">
+                                    <input type="checkbox"
+                                           th:id="${'pillar-' + pillar.name()}"
+                                           name="pillars"
+                                           th:value="${pillar.name()}"
+                                           class="pillar-checkbox"
+                                           th:checked="${evidence.selfAssessment().containsKey(pillar)}"
+                                           th:attr="data-pillar=${pillar.name()}"
+                                           th:aria-label="|Select ${pillar.name()} for assessment|" />
+                                    <label th:for="${'pillar-' + pillar.name()}" class="pillar-label">
+                                        <span class="pillar-tag" th:text="${pillar.name()}">DEFINES</span>
+                                    </label>
+                                </div>
+
+                                <div class="dreyfus-selector" th:id="${'score-group-' + pillar.name()}">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="dreyfus-label-small">Assessor Score</label>
+                                        <span th:if="${evidence.selfAssessment().containsKey(pillar)}" 
+                                              class="text-xs opacity-60" 
+                                              th:text="'Self-Rated: ' + ${evidence.selfAssessment().get(pillar).value()}">Self: 3</span>
+                                    </div>
+                                    <select th:name="${'scores[' + pillar.name() + ']'}"
+                                            class="dreyfus-select form-control-sm"
+                                            th:id="${'score-' + pillar.name()}"
+                                            th:title="|Assessment score for ${pillar.name()}|">
+                                        <option value="1">1 — Novice</option>
+                                        <option value="2">2 — Advanced Beginner</option>
+                                        <option value="3" selected>3 — Competent</option>
+                                        <option value="4">4 — Proficient</option>
+                                        <option value="5">5 — Expert</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Summary -->
+                <div class="glass-panel p-6 mb-6">
+                    <h2 class="section-title mb-4">Review Summary</h2>
+                    <div class="form-group mb-5">
+                        <label for="reviewSummary" class="form-label">Feedback <span class="required-star">*</span></label>
+                        <textarea id="reviewSummary"
+                                  name="reviewSummary"
+                                  class="form-control"
+                                  rows="6"
+                                  required
+                                  placeholder="Provide constructive feedback for the developer based on this evidence..."></textarea>
+                        <p class="form-hint">Summarise your assessment and justify the scores provided above.</p>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions flex justify-end gap-4 mb-8">
+                    <a href="/assessment/queue" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary" id="submit-assessment-btn">
+                        Submit Assessment
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</section>
+
+<th:block layout:fragment="scripts">
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('.pillar-checkbox');
+
+    function updateScoreVisibility(checkbox) {
+        const pillarName = checkbox.dataset.pillar;
+        const scoreGroup = document.getElementById('score-group-' + pillarName);
+        if (scoreGroup) {
+            scoreGroup.style.display = checkbox.checked ? 'block' : 'none';
+        }
+    }
+
+    checkboxes.forEach(function (cb) {
+        updateScoreVisibility(cb);
+        cb.addEventListener('change', function () {
+            updateScoreVisibility(cb);
+        });
+    });
+});
+</script>
+</th:block>
+
 </body>
 </html>

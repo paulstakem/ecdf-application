@@ -10,6 +10,9 @@
   --accent-success: #10b981; /* Premium emerald green */
   --accent-warning: #f59e0b; /* Amber */
   --accent-danger: #ef4444; /* Rose red */
+  --status-error: #ef4444;
+  --status-success: #10b981;
+  --status-info: #3b82f6;
 
   /* Glassmorphism Variables */
   --glass-bg: rgba(30, 41, 59, 0.7);
@@ -113,6 +116,17 @@ p {
   transform: translateY(-1px);
 }
 
+.btn-secondary {
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--glass-border);
+  border-color: var(--text-secondary);
+}
+
 /* Links */
 a {
   color: var(--accent-primary);
@@ -141,3 +155,5 @@ a:hover {
 .mt-4 { margin-top: 1rem; }
 .mt-8 { margin-top: 2rem; }
 .mb-8 { margin-bottom: 2rem; }
+.flex-grow { flex-grow: 1; }
+.text-right { text-align: right; }

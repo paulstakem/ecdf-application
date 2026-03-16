@@ -15,6 +15,8 @@ dependencies {
     implementation libs.spring.boot.starter.validation
     implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.thymeleaf
+    implementation libs.thymeleaf.layout.dialect
+    implementation libs.thymeleaf.extras.springsecurity6
     
     // Database
     runtimeOnly libs.h2

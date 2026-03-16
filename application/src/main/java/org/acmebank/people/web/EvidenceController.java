@@ -145,16 +145,23 @@ public class EvidenceController {
             Principal principal,
             Model model) {
 
-        User user = resolveUser(principal);
+        User currentUser = resolveUser(principal);
         Evidence evidence = evidenceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
 
-        if (!evidence.userId().equals(user.id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        checkCanViewEvidence(currentUser, evidence);
+
+        User evidenceOwner = userRepository.findById(evidence.userId()).get();
+        boolean isManager = currentUser.id().equals(evidenceOwner.managerId());
+
+        if (isManager) {
+            model.addAttribute("allItas", userRepository.findItas());
         }
 
         model.addAttribute("evidence", evidence);
         model.addAttribute("pillars", Pillar.values());
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("isManager", isManager);
         return "evidence-detail";
     }
 
@@ -248,9 +255,7 @@ public class EvidenceController {
         Evidence evidence = evidenceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
 
-        if (!evidence.userId().equals(user.id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        checkCanViewEvidence(user, evidence);
 
         List<String> attachments = evidence.attachmentPaths();
         if (attachments == null || index < 0 || index >= attachments.size()) {
@@ -274,6 +279,22 @@ public class EvidenceController {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    private void checkCanViewEvidence(User currentUser, Evidence evidence) {
+        if (evidence.userId().equals(currentUser.id())) {
+            return;
+        }
+
+        User owner = userRepository.findById(evidence.userId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Owner not found"));
+
+        boolean isManager = currentUser.id().equals(owner.managerId());
+        boolean isIta = currentUser.isIta();
+
+        if (!isManager && !isIta) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+    }
 
     private User resolveUser(Principal principal) {
         if (principal == null) {

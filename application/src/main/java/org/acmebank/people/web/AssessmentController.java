@@ -42,7 +42,10 @@ public class AssessmentController {
     public String showAssessmentForm(@PathVariable UUID evidenceId, Model model) {
         Evidence evidence = evidenceRepository.findById(evidenceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
+        User developer = userRepository.findById(evidence.userId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Developer not found"));
         model.addAttribute("evidence", evidence);
+        model.addAttribute("developer", developer);
         model.addAttribute("pillars", Pillar.values());
         return "assessment-form";
     }

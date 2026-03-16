@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: demo-data-users
+      author: ai-assistant
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "d3b07384-dead-4ead-beef-000000000001" }
+              - column: { name: email, value: "user@example.com" }
+              - column: { name: full_name, value: "Developer Dave" }
+              - column: { name: is_ita, valueBoolean: false }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "d3b07384-dead-4ead-beef-000000000002" }
+              - column: { name: email, value: "manager@example.com" }
+              - column: { name: full_name, value: "Manager Mary" }
+              - column: { name: is_ita, valueBoolean: false }
+        - update:
+            tableName: users
+            columns:
+              - column: { name: manager_id, value: "d3b07384-dead-4ead-beef-000000000002" }
+            where: email = 'user@example.com'

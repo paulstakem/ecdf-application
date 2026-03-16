@@ -63,11 +63,12 @@ class AssessmentControllerTest {
     fun `should show assessment form for submitted evidence`() {
         `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
         `when`(userRepository.findByEmail("mgr@example.com")).thenReturn(Optional.of(mockAssessor))
+        `when`(userRepository.findById(userId)).thenReturn(Optional.of(User(userId, "dev@example.com", "Jane Dev", null, null, false)))
 
         mockMvc.perform(get("/assessment/$evidenceId"))
             .andExpect(status().isOk)
             .andExpect(view().name("assessment-form"))
-            .andExpect(model().attributeExists("evidence", "pillars"))
+            .andExpect(model().attributeExists("evidence", "developer", "pillars"))
     }
 
     @Test

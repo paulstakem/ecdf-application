@@ -58,8 +58,8 @@
   - [x] Implement secure file download endpoint for attachments
 - [ ] Evidence Assessment & 3rd-Party Workflow:
   - [x] Write Controller tests and implement `AssessmentController`
-  - [ ] Implement `assessment-form.html` (for Managers/ITAs) with independent pillar scoring and Review Summary
-  - [ ] Implement UI flow for Manager to assign evidence to an Independent Technical Assessor (ITA)
+  - [x] Implement `assessment-form.html` (for Managers/ITAs) with independent pillar scoring and Review Summary
+  - [x] Implement UI flow for Manager to assign evidence to an Independent Technical Assessor (ITA)
   - [ ] Implement `assessor-queue.html` listing evidence assigned to the current user
 - [ ] Check-In & Period Review (Quarterly):
   - [ ] Write Controller tests and implement `CheckInController`

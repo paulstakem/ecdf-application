@@ -14,5 +14,7 @@ public interface UserRepository {
 
     List<User> findByManagerId(UUID managerId);
 
+    List<User> findItas();
+
     List<User> findAll();
 }

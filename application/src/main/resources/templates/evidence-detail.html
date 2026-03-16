@@ -15,10 +15,36 @@
             <h1 class="mt-2" th:text="${evidence.title()}">Evidence Title</h1>
         </div>
         <div class="action-group flex gap-3">
-            <a th:if="${evidence.status().name() == 'DRAFT'}"
+            <a th:if="${evidence.userId() == currentUser.id() and evidence.status().name() == 'DRAFT'}"
                th:href="@{/evidence/{id}/edit(id=${evidence.id()})}"
                class="btn btn-secondary">Edit</a>
         </div>
+    </div>
+
+    <!-- Manager Actions: Assign ITA -->
+    <div th:if="${isManager}" class="glass-panel p-6 mb-6 accent-border-blue">
+        <h2 class="section-title mb-4 flex items-center gap-2">
+            <span class="text-blue-400">🛡️</span> Manager Actions
+        </h2>
+        <div class="flex flex-col md:flex-row items-end gap-4">
+            <form th:action="@{/assessment/{id}/assign(id=${evidence.id()})}" method="post" class="flex flex-col md:flex-row items-end gap-4 w-full">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="form-group flex-grow">
+                    <label for="assessorId" class="form-label-small">Assign Independent Technical Assessor (ITA)</label>
+                    <div class="select-wrapper">
+                        <select id="assessorId" name="assessorId" class="form-control" required title="Select an ITA to assign">
+                            <option value="" disabled selected>Select an ITA...</option>
+                            <option th:each="ita : ${allItas}" 
+                                    th:value="${ita.id()}" 
+                                    th:text="${ita.fullName() + ' (' + ita.email() + ')'}"
+                                    th:disabled="${ita.id() == currentUser.id()}">ITA Name</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary whitespace-nowrap">Assign for Review</button>
+            </form>
+        </div>
+        <p class="form-hint mt-2">Assigning an ITA will delegate the technical assessment for this piece of evidence.</p>
     </div>
 
     <!-- Status & Metadata -->

@@ -174,12 +174,13 @@ class EvidenceControllerTest {
     @WithMockUser(username = "user@example.com")
     fun `should show evidence detail view`() {
         `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(userRepository.findById(userId)).thenReturn(Optional.of(mockUser))
         `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
 
         mockMvc.perform(get("/evidence/$evidenceId"))
             .andExpect(status().isOk)
             .andExpect(view().name("evidence-detail"))
-            .andExpect(model().attributeExists("evidence"))
+            .andExpect(model().attributeExists("evidence", "currentUser", "isManager"))
     }
 
     @Test
@@ -190,6 +191,25 @@ class EvidenceControllerTest {
 
         mockMvc.perform(get("/evidence/$evidenceId"))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    @WithMockUser(username = "mgr@example.com")
+    fun `should allow manager to view evidence and see ITA list`() {
+        val managerId = UUID.randomUUID()
+        val mockManager = User(managerId, "mgr@example.com", "Manager Bob", mockUser.grade(), null, false)
+        val mockUserWithManager = User(mockUser.id(), mockUser.email(), mockUser.fullName(), mockUser.grade(), managerId, mockUser.isIta())
+        val mockIta = User(UUID.randomUUID(), "ita@example.com", "ITA Alice", mockUser.grade(), null, true)
+
+        `when`(userRepository.findByEmail("mgr@example.com")).thenReturn(Optional.of(mockManager))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
+        `when`(userRepository.findById(userId)).thenReturn(Optional.of(mockUserWithManager))
+        `when`(userRepository.findItas()).thenReturn(listOf(mockIta))
+
+        mockMvc.perform(get("/evidence/$evidenceId"))
+            .andExpect(status().isOk)
+            .andExpect(model().attribute("isManager", true))
+            .andExpect(model().attributeExists("allItas"))
     }
 
     // -------------------------------------------------------------------------
@@ -263,9 +283,33 @@ class EvidenceControllerTest {
     @WithMockUser(username = "user@example.com")
     fun `should return 404 for download when evidence has no attachments`() {
         `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(userRepository.findById(userId)).thenReturn(Optional.of(mockUser))
         `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
 
         mockMvc.perform(get("/evidence/$evidenceId/attachment/0"))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should download attachment when user has permission`() {
+        val fileName = "test-file.txt"
+        val fullPath = tempDir.resolve(fileName)
+        java.nio.file.Files.write(fullPath, "hello world".toByteArray())
+        
+        val evidenceWithAttachment = Evidence(
+            mockEvidence.id(), mockEvidence.userId(), mockEvidence.title(), mockEvidence.impact(),
+            mockEvidence.complexity(), mockEvidence.contribution(), mockEvidence.selfAssessment(),
+            mockEvidence.links(), listOf(fullPath.toString()), mockEvidence.status(),
+            mockEvidence.createdDate(), mockEvidence.lastModifiedDate()
+        )
+        
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(userRepository.findById(userId)).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(evidenceWithAttachment))
+
+        mockMvc.perform(get("/evidence/$evidenceId/attachment/0"))
+            .andExpect(status().isOk)
+            .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\""))
     }
 }
