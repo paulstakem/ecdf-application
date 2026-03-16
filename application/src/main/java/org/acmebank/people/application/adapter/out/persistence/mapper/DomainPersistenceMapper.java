@@ -151,6 +151,12 @@ public class DomainPersistenceMapper {
         if (domain == null)
             return null;
         AssessmentEntity entity = new AssessmentEntity();
+        updateAssessmentEntity(entity, domain, evidenceEntity, assessorEntity);
+        return entity;
+    }
+
+    public static void updateAssessmentEntity(AssessmentEntity entity, Assessment domain, EvidenceEntity evidenceEntity,
+            UserEntity assessorEntity) {
         entity.setId(domain.id());
         entity.setEvidence(evidenceEntity);
         entity.setAssessor(assessorEntity);
@@ -158,12 +164,13 @@ public class DomainPersistenceMapper {
         entity.setThirdParty(domain.isThirdParty());
         entity.setAssessmentDate(domain.assessmentDate());
 
+        // Update scores map
+        entity.getScores().clear();
         if (domain.assessedScores() != null) {
             domain.assessedScores().forEach((pillar, score) -> {
                 entity.getScores().put(pillar.name(), score.value());
             });
         }
-        return entity;
     }
 
     public static CheckIn toDomainCheckIn(CheckInEntity entity) {

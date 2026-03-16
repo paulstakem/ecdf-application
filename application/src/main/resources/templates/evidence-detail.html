@@ -21,7 +21,7 @@
             <form th:if="${evidence.userId() == currentUser.id() and evidence.status().name() == 'DRAFT'}"
                   th:action="@{/evidence/{id}/submit(id=${evidence.id()})}"
                   method="post"
-                  style="margin-bottom: 0;">
+                  class="logout-form">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="btn btn-primary shadow-sm glow-effect">Submit for Review</button>
             </form>

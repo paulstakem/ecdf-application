@@ -8,14 +8,14 @@
 <body>
     <div layout:fragment="content">
         <!-- Hero Section -->
-        <section class="glass-panel mb-8" style="padding: 3rem 2rem;">
+        <section class="glass-panel hero-section mb-8">
             <div class="flex items-center gap-4 mb-4">
-                <div class="user-avatar" style="width: 60px; height: 60px; background: var(--accent-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: white;">
+                <div class="user-avatar-large">
                     <span th:text="${currentUser.fullName().substring(0,1)}">U</span>
                 </div>
                 <div>
-                    <h2 style="margin: 0; font-size: 2rem;">Welcome back, <span th:text="${currentUser.fullName()}">User</span></h2>
-                    <p class="text-secondary" style="margin: 0;">Employee Career Development Framework</p>
+                    <h2 class="welcome-title">Welcome back, <span th:text="${currentUser.fullName()}">User</span></h2>
+                    <p class="text-secondary welcome-subtitle">Employee Career Development Framework</p>
                 </div>
             </div>
             <p class="mt-4 text-lg">Manage your career growth, submit evidence of your impact, and track your assessments all in one place.</p>
@@ -37,7 +37,7 @@
                 <h3 class="section-title mb-4">👥 Team Management</h3>
                 <p class="mb-6">Review your team's current development progress and evidence submissions.</p>
                 <div class="flex flex-col gap-3">
-                    <a th:href="@{/team}" class="btn btn-primary w-full text-center" style="background: var(--accent-purple);">View My Team</a>
+                    <a th:href="@{/team}" class="btn btn-purple w-full text-center">View My Team</a>
                     <a th:href="@{/assessment/queue}" class="btn btn-secondary w-full text-center">Assessment Queue</a>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                 <h3 class="section-title mb-4">🛡️ Technical Assessment</h3>
                 <p class="mb-6">You have been assigned as an Independent Technical Assessor for several reviews.</p>
                 <div class="flex flex-col gap-3">
-                    <a th:href="@{/assessment/queue}" class="btn btn-primary w-full text-center" style="background: var(--accent-green);">View Assessment Queue</a>
+                    <a th:href="@{/assessment/queue}" class="btn btn-green w-full text-center">View Assessment Queue</a>
                     <p class="text-sm text-center mt-2 text-secondary">Assess technical depth and contribution.</p>
                 </div>
             </div>

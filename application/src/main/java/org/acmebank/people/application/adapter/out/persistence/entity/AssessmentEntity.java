@@ -14,8 +14,10 @@ import java.util.UUID;
 public class AssessmentEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Version
+    private Long version;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evidence_id", nullable = false, unique = true)

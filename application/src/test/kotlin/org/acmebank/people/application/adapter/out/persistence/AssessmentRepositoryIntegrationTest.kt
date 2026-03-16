@@ -74,6 +74,7 @@ class AssessmentRepositoryIntegrationTest {
         val savedEvidence = evidenceRepository.save(evidence)
 
         val assessment = AssessmentEntity().apply {
+            id = java.util.UUID.randomUUID()
             this.evidence = savedEvidence
             this.assessor = savedManager
             reviewSummary = "Great work!"
