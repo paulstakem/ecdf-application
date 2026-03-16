@@ -4,6 +4,8 @@
   --bg-secondary: #1e293b; /* Slightly lighter shade for contrast */
   --text-primary: #f8fafc; /* Near white for main text */
   --text-secondary: #94a3b8; /* Slate gray for secondary details */
+  --text-muted: #64748b;
+  --text-main: #f8fafc;
   
   --accent-primary: #3b82f6; /* Vibrant blue */
   --accent-hover: #2563eb; 
