@@ -98,7 +98,7 @@ public class AssessmentService {
                 evidence.selfAssessment(),
                 evidence.links(),
                 evidence.attachmentPaths(),
-                EvidenceStatus.ASSESSED,
+                EvidenceStatus.MANAGER_ASSESSED,
                 evidence.createdDate(),
                 LocalDate.now()
         );

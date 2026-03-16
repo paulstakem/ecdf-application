@@ -38,7 +38,8 @@ public class CheckInService {
         LocalDate now = LocalDate.now();
         LocalDate threeYearsAgo = now.minusYears(3);
 
-        List<Evidence> assessedEvidence = evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED);
+        List<Evidence> assessedEvidence = new java.util.ArrayList<>(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED));
+        assessedEvidence.addAll(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED));
 
         Map<Pillar, Score> aggregatedScores = new EnumMap<>(Pillar.class);
         boolean hasItaAssessment = false;

@@ -114,8 +114,10 @@ class AssessmentServiceTest {
         result.assessmentDate shouldNotBe null
 
         verify(assessmentRepository).save(any(Assessment::class.java))
-        // Verify evidence status was also updated to ASSESSED
-        verify(evidenceRepository).save(any(Evidence::class.java))
+        // Verify evidence status was also updated to MANAGER_ASSESSED
+        val statusCaptor = org.mockito.ArgumentCaptor.forClass(Evidence::class.java)
+        verify(evidenceRepository).save(statusCaptor.capture())
+        statusCaptor.value.status shouldBe EvidenceStatus.MANAGER_ASSESSED
     }
 
     @Test
@@ -151,7 +153,9 @@ class AssessmentServiceTest {
         result.assessmentDate shouldNotBe null
 
         verify(assessmentRepository).save(any(Assessment::class.java))
-        verify(evidenceRepository).save(any(Evidence::class.java))
+        val statusCaptor = org.mockito.ArgumentCaptor.forClass(Evidence::class.java)
+        verify(evidenceRepository).save(statusCaptor.capture())
+        statusCaptor.value.status shouldBe EvidenceStatus.MANAGER_ASSESSED
     }
 
     @Test
@@ -205,7 +209,7 @@ class AssessmentServiceTest {
         val assessedEvidence = Evidence(
             evidenceId, UUID.randomUUID(), "Test", "Description", "Impact", "Complexity", "Contribution",
             mapOf(Pillar.THINKS to Score(3)), emptyList(), emptyList(),
-            EvidenceStatus.ASSESSED, LocalDate.now(), LocalDate.now()
+            EvidenceStatus.MANAGER_ASSESSED, LocalDate.now(), LocalDate.now()
         )
 
         `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(assessedEvidence))

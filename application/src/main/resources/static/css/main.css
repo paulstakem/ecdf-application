@@ -334,6 +334,7 @@ a:hover {
 }
 
 .status-assessed,
+.status-manager_assessed,
 .badge-success,
 .status-active {
   background: rgba(16, 185, 129, 0.15);

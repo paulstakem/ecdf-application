@@ -48,7 +48,8 @@ class CheckInServiceTest {
         val evidence1 = createEvidence(userId, evidence1Id, LocalDate.now())
         val assessment1 = createAssessment(evidence1Id, mapOf(Pillar.THINKS to Score(3)), false)
 
-        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(listOf(evidence1))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence1))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
         lenient().`when`(assessmentRepository.findByEvidenceId(evidence1Id)).thenReturn(Optional.of(assessment1))
         lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
 
@@ -77,7 +78,8 @@ class CheckInServiceTest {
         // Assessment is not third party
         val assessment = createAssessment(evidenceId, mapOf(Pillar.THINKS to Score(4), Pillar.DELIVERS to Score(4)), false)
 
-        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(listOf(evidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
         lenient().`when`(assessmentRepository.findByEvidenceId(evidenceId)).thenReturn(Optional.of(assessment))
         lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
 
@@ -103,7 +105,8 @@ class CheckInServiceTest {
         // Assessment IS third party and meets scores
         val assessment = createAssessment(evidenceId, mapOf(Pillar.THINKS to Score(4)), true)
 
-        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(listOf(evidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
         lenient().`when`(assessmentRepository.findByEvidenceId(evidenceId)).thenReturn(Optional.of(assessment))
         lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
 
@@ -130,7 +133,8 @@ class CheckInServiceTest {
         // Assessment scores indicate ready, but it shouldn't be counted
         val oldAssessment = createAssessment(oldEvidenceId, mapOf(Pillar.THINKS to Score(5)), true)
 
-        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(listOf(oldEvidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(oldEvidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
         lenient().`when`(assessmentRepository.findByEvidenceId(oldEvidenceId)).thenReturn(Optional.of(oldAssessment))
         lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
 
@@ -162,7 +166,8 @@ class CheckInServiceTest {
         // Actually, typical ECDF aggregates the best valid score they've achieved within the window.
         val assessment2 = createAssessment(evidence2Id, mapOf(Pillar.THINKS to Score(4)), false)
 
-        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(listOf(evidence1, evidence2))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence1, evidence2))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
         lenient().`when`(assessmentRepository.findByEvidenceId(evidence1Id)).thenReturn(Optional.of(assessment1))
         lenient().`when`(assessmentRepository.findByEvidenceId(evidence2Id)).thenReturn(Optional.of(assessment2))
         lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
@@ -177,7 +182,7 @@ class CheckInServiceTest {
     private fun createEvidence(userId: UUID, evidenceId: UUID, createdDate: LocalDate): Evidence {
         return Evidence(
             evidenceId, userId, "Title", "Description", "Impact", "Complexity", "Contribution",
-            emptyMap(), emptyList(), emptyList(), EvidenceStatus.ASSESSED, createdDate, createdDate
+            emptyMap(), emptyList(), emptyList(), EvidenceStatus.MANAGER_ASSESSED, createdDate, createdDate
         )
     }
 

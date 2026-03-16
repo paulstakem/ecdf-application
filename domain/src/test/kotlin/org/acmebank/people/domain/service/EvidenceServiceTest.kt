@@ -131,7 +131,7 @@ class EvidenceServiceTest {
         val exception = shouldThrow<IllegalStateException> {
             evidenceService.updateEvidence(evidenceId, "New Title", "New Description", "New Impact", "New Complexity", "New Contribution", mapOf(Pillar.THINKS to Score(4)))
         }
-        exception.message shouldBe "Cannot modify evidence that is already SUBMITTED or ASSESSED."
+        exception.message shouldBe "Cannot modify evidence that is already SUBMITTED, MANAGER_ASSESSED, or ASSESSED."
     }
 
     @Test
