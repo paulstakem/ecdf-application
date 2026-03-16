@@ -315,4 +315,23 @@ class EvidenceControllerTest {
             .andExpect(status().isOk)
             .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\""))
     }
+
+    // -------------------------------------------------------------------------
+    // POST /evidence/{id}/submit — submit for review
+    // -------------------------------------------------------------------------
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    fun `should submit DRAFT evidence and redirect to list`() {
+        `when`(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(mockUser))
+        `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(mockEvidence))
+        `when`(evidenceService.submitEvidence(evidenceId)).thenReturn(mockEvidence)
+
+        mockMvc.perform(
+            post("/evidence/$evidenceId/submit")
+                .with(csrf())
+        )
+            .andExpect(status().is3xxRedirection)
+            .andExpect(redirectedUrl("/evidence"))
+    }
 }

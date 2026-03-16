@@ -243,6 +243,31 @@ public class EvidenceController {
     }
 
     // -------------------------------------------------------------------------
+    // POST /evidence/{id}/submit — submit for review
+    // -------------------------------------------------------------------------
+    @PostMapping("/{id}/submit")
+    public String submitEvidence(
+            @PathVariable("id") UUID id,
+            Principal principal) {
+
+        User user = resolveUser(principal);
+        Evidence evidence = evidenceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evidence not found"));
+
+        if (!evidence.userId().equals(user.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            evidenceService.submitEvidence(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+
+        return "redirect:/evidence";
+    }
+
+    // -------------------------------------------------------------------------
     // GET /evidence/{id}/attachment/{index} — secure file download
     // -------------------------------------------------------------------------
     @GetMapping("/{id}/attachment/{index}")
