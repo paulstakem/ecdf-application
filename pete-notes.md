@@ -10,3 +10,4 @@
 - LLM is not great at cleaning up after itself ... lots of test results outputs
 - LLM keeps runnig random tests all the time ... thinking broken build but actually everything is fine
 - LLM is hallucinating that the tests are failing when they are not
+- to run your application dont be fooled into thinking you can run it from inside
