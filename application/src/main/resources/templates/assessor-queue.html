@@ -1,78 +1,90 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
 <head>
-    <title>Assessor Queue - ECDF</title>
+    <title>Assessment Queue - ECDF</title>
 </head>
 <body>
-<div layout:fragment="content">
-    <div class="glass-panel mb-8">
-        <h1 class="premium-title">Assessment Queue</h1>
-        <p class="text-secondary">Track and complete evidence reviews for your team and assigned technical assessments.</p>
+
+<section layout:fragment="content">
+    <div class="header-content mb-8">
+        <h1>Assessment Queue</h1>
+        <p class="text-secondary">Review and assess evidence submitted by engineers across the organization.</p>
     </div>
 
-    <!-- Section 1: Team Evidence -->
-    <div class="glass-panel mb-8" th:if="${not #lists.isEmpty(teamEvidence)}">
-        <h2 class="section-title mb-4">👥 Team Evidence Pending Review</h2>
+    <!-- Assigned to Me (Technical Assessments / ITAs) -->
+    <div class="glass-panel p-6 mb-8">
+        <h2 class="section-title mb-4 flex items-center gap-2">
+            <span class="text-blue-400">📋</span> Assigned Technical Assessments
+        </h2>
         <div class="table-container">
-            <table class="w-full">
+            <table class="data-table">
                 <thead>
                     <tr>
-                        <th class="text-left py-3 px-4">Developer</th>
-                        <th class="text-left py-3 px-4">Evidence Title</th>
-                        <th class="text-left py-3 px-4">Submitted</th>
-                        <th class="text-right py-3 px-4">Actions</th>
+                        <th>Engineer</th>
+                        <th>Evidence Title</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="evidence : ${teamEvidence}" class="border-t border-glass-border">
-                        <td class="py-4 px-4">
-                            <span class="fw-500" th:text="${userNames.get(evidence.userId())}">Developer Name</span>
+                    <tr th:each="assessment : ${pendingAssessments}">
+                        <td th:text="${userNames.get(assessment.id())}">Engineer Name</td>
+                        <td th:text="${evidenceTitles.get(assessment.id())}">Evidence Title</td>
+                        <td>
+                            <span class="status-badge status-pending">PENDING ITA</span>
                         </td>
-                        <td class="py-4 px-4" th:text="${evidence.title()}">Evidence Title</td>
-                        <td class="py-4 px-4 text-sm text-secondary" th:text="${#temporals.format(evidence.createdDate(), 'dd MMM yyyy')}">Date</td>
-                        <td class="py-4 px-4 text-right">
+                        <td>
+                            <a th:href="@{/assessment/{id}(id=${assessment.evidenceId()})}" class="btn btn-primary btn-sm">Assess Evidence</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(pendingAssessments)}">
+                        <td colspan="4" class="empty-state text-center p-8">
+                            <p class="text-muted">No specific assessments assigned to you.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Direct Reports (Manager Review Queue) -->
+    <div class="glass-panel p-6">
+        <h2 class="section-title mb-4 flex items-center gap-2">
+            <span class="text-emerald-400">👥</span> Team Review Queue
+        </h2>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Engineer</th>
+                        <th>Evidence Title</th>
+                        <th>Date Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="evidence : ${teamEvidence}">
+                        <td th:text="${userNames.get(evidence.id())}">Engineer Name</td>
+                        <td th:text="${evidence.title()}">Evidence Title</td>
+                        <td th:text="${#temporals.format(evidence.lastModifiedDate(), 'MMM dd, yyyy')}">Oct 12, 2025</td>
+                        <td class="flex gap-2">
+                            <a th:href="@{/evidence/{id}(id=${evidence.id()})}" class="btn btn-secondary btn-sm">View Details</a>
                             <a th:href="@{/assessment/{id}(id=${evidence.id()})}" class="btn btn-primary btn-sm">Assess</a>
                         </td>
                     </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Section 2: Assigned Assessments -->
-    <div class="glass-panel" th:if="${not #lists.isEmpty(pendingAssessments)}">
-        <h2 class="section-title mb-4">🛡️ My Assigned Technical Assessments</h2>
-        <div class="table-container">
-            <table class="w-full">
-                <thead>
-                    <tr>
-                        <th class="text-left py-3 px-4">Developer</th>
-                        <th class="text-left py-3 px-4">Evidence Title</th>
-                        <th class="text-right py-3 px-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="assessment : ${pendingAssessments}" class="border-t border-glass-border">
-                        <td class="py-4 px-4">
-                            <span class="fw-500" th:text="${userNames.get(assessment.id())}">Developer Name</span>
-                        </td>
-                        <td class="py-4 px-4" th:text="${evidenceTitles.get(assessment.id())}">Evidence Title</td>
-                        <td class="py-4 px-4 text-right">
-                            <a th:href="@{/assessment/{id}(id=${assessment.evidenceId()})}" class="btn btn-primary btn-sm" style="background: var(--accent-green);">Review as ITA</a>
+                    <tr th:if="${#lists.isEmpty(teamEvidence)}">
+                        <td colspan="4" class="empty-state text-center p-8">
+                            <p class="text-muted">No team members have pending evidence reviews.</p>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <p class="form-hint mt-4">These are initial submissions from your direct reports that haven't been assessed yet.</p>
     </div>
+</section>
 
-    <div class="glass-panel text-center py-12" th:if="${#lists.isEmpty(teamEvidence) and #lists.isEmpty(pendingAssessments)}">
-        <div class="mb-4" style="font-size: 3rem;">✅</div>
-        <h3>Queue Cleared!</h3>
-        <p class="text-secondary">You have no pending evidence reviews or assignments at this time.</p>
-        <a th:href="@{/}" class="btn btn-secondary mt-4">Back to Dashboard</a>
-    </div>
-</div>
 </body>
 </html>

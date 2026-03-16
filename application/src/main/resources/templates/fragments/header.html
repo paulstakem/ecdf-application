@@ -5,34 +5,34 @@
     <meta charset="UTF-8">
 </head>
 <body>
-    <header th:fragment="header" class="glass-panel" style="border-radius: 0; border-bottom: 1px solid var(--glass-border); padding: 1rem 2rem;">
-        <div class="container flex justify-between items-center" style="padding: 0;">
+    <header th:fragment="header" class="main-header">
+        <div class="container flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <h1 style="margin-bottom: 0; color: var(--accent-primary); font-size: 1.5rem;">ECDF <span style="color: var(--text-primary); font-weight: 500;">Assessments</span></h1>
             </div>
             
             <div class="flex items-center gap-6" sec:authorize="isAuthenticated()">
-                <nav class="flex gap-4">
-                    <a th:href="@{/}" class="btn">Dashboard</a>
-                    <a th:href="@{/team}" class="btn">My Team</a>
-                    <a th:href="@{/evidence}" class="btn">Evidence Log</a>
-                    <a th:href="@{/assessment/queue}" class="btn">Assessments</a>
+                <nav class="flex gap-2">
+                    <a th:href="@{/}" class="nav-link" th:classappend="${#httpServletRequest.requestURI == '/' ? 'active' : ''}">Dashboard</a>
+                    <a th:href="@{/team}" class="nav-link" th:classappend="${#httpServletRequest.requestURI == '/team' ? 'active' : ''}">My Team</a>
+                    <a th:href="@{/evidence}" class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/evidence') ? 'active' : ''}">Evidence Log</a>
+                    <a th:href="@{/assessment/queue}" class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/assessment') ? 'active' : ''}">Assessments</a>
                 </nav>
                 
                 <div class="flex items-center pl-6 gap-4" style="border-left: 1px solid var(--glass-border);">
-                    <div class="user-badge flex items-center gap-2" style="background: rgba(255,255,255,0.05); padding: 0.4rem 0.8rem; border-radius: 20px;">
-                        <span style="width: 8px; height: 8px; background: var(--accent-success); border-radius: 50%;"></span>
-                        <span class="text-sm fw-500" style="color: var(--text-secondary); font-size: 0.85rem;" sec:authentication="name">user@example.com</span>
+                    <div class="user-profile-badge flex items-center gap-2">
+                        <span class="status-dot"></span>
+                        <span class="text-sm" style="color: var(--text-secondary); font-size: 0.85rem;" sec:authentication="name">user@example.com</span>
                     </div>
                     <form th:action="@{/logout}" method="post" style="margin-bottom: 0;">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <button type="submit" class="btn btn-secondary" style="border-color: var(--accent-danger); color: var(--accent-danger); padding: 0.4rem 1rem; font-size: 1rem;">Logout</button>
+                        <button type="submit" class="btn btn-logout">Logout</button>
                     </form>
                 </div>
             </div>
             
             <div class="flex items-center" sec:authorize="!isAuthenticated()">
-                <a th:href="@{/login}" class="btn btn-primary" style="padding: 0.4rem 1.5rem;">Sign In</a>
+                <a th:href="@{/login}" class="btn btn-primary btn-sm">Sign In</a>
             </div>
         </div>
     </header>
