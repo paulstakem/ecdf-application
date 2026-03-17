@@ -24,7 +24,7 @@ public class PdpService {
 
     public PdpItem createPdpItem(UUID userId, UUID checkInId, Pillar pillar, String gapDescription, String actionablePlan, String learningJourneyLink) {
         PdpItem item = new PdpItem(
-                UUID.randomUUID(),
+                null,
                 userId,
                 checkInId,
                 pillar,

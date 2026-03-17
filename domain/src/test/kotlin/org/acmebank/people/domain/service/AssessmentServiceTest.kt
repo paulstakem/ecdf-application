@@ -41,7 +41,14 @@ class AssessmentServiceTest {
         )
 
         `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(evidence))
-        `when`(assessmentRepository.save(any(Assessment::class.java))).thenAnswer { it.getArgument(0) }
+        `when`(assessmentRepository.save(any(Assessment::class.java))).thenAnswer { invocation ->
+            val assessment = invocation.getArgument<Assessment>(0)
+            if (assessment.id() == null) {
+                Assessment(UUID.randomUUID(), assessment.evidenceId(), assessment.assessorId(), assessment.assessedScores(), assessment.reviewSummary(), assessment.isThirdParty(), assessment.assessmentDate())
+            } else {
+                assessment
+            }
+        }
 
         // When
         val assessment = assessmentService.assignThirdPartyAssessor(evidenceId, assessorId)
@@ -137,7 +144,14 @@ class AssessmentServiceTest {
 
         `when`(evidenceRepository.findById(evidenceId)).thenReturn(Optional.of(evidence))
         `when`(assessmentRepository.findByEvidenceId(evidenceId)).thenReturn(Optional.empty())
-        `when`(assessmentRepository.save(any(Assessment::class.java))).thenAnswer { it.getArgument(0) }
+        `when`(assessmentRepository.save(any(Assessment::class.java))).thenAnswer { invocation ->
+            val assessment = invocation.getArgument<Assessment>(0)
+            if (assessment.id() == null) {
+                Assessment(UUID.randomUUID(), assessment.evidenceId(), assessment.assessorId(), assessment.assessedScores(), assessment.reviewSummary(), assessment.isThirdParty(), assessment.assessmentDate())
+            } else {
+                assessment
+            }
+        }
         `when`(evidenceRepository.save(any(Evidence::class.java))).thenAnswer { it.getArgument(0) }
 
         // When

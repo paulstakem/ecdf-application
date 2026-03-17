@@ -80,7 +80,7 @@ public class CheckInService {
         CheckInStatus status = evaluateStatus(aggregatedScores, targetGrade, hasItaAssessment);
 
         CheckIn checkIn = new CheckIn(
-                UUID.randomUUID(),
+                null,
                 userId,
                 managerId,
                 now.minusMonths(3), // Example period start

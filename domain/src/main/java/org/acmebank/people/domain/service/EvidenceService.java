@@ -21,7 +21,7 @@ public class EvidenceService {
 
     public Evidence createEvidence(UUID userId, String title) {
         Evidence newEvidence = new Evidence(
-                UUID.randomUUID(),
+                null,
                 userId,
                 title,
                 "", // description

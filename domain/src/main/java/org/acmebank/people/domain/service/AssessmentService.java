@@ -32,7 +32,7 @@ public class AssessmentService {
         }
 
         Assessment pendingAssessment = new Assessment(
-                UUID.randomUUID(),
+                null,
                 evidenceId,
                 assessorId,
                 null,
@@ -75,7 +75,7 @@ public class AssessmentService {
             );
         } else {
             assessmentToSave = new Assessment(
-                    UUID.randomUUID(),
+                    null,
                     evidenceId,
                     assessorId,
                     scores,

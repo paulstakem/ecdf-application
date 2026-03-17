@@ -29,7 +29,28 @@ class EvidenceServiceTest {
         val userId = UUID.randomUUID()
         val title = "Implemented Caching Layer"
         
-        `when`(evidenceRepository.save(any(Evidence::class.java))).thenAnswer { it.getArgument(0) }
+        `when`(evidenceRepository.save(any(Evidence::class.java))).thenAnswer { invocation ->
+            val evidence = invocation.getArgument<Evidence>(0)
+            if (evidence.id() == null) {
+                Evidence(
+                    UUID.randomUUID(),
+                    evidence.userId(),
+                    evidence.title(),
+                    evidence.description(),
+                    evidence.impact(),
+                    evidence.complexity(),
+                    evidence.contribution(),
+                    evidence.selfAssessment(),
+                    evidence.links(),
+                    evidence.attachmentPaths(),
+                    evidence.status(),
+                    evidence.createdDate(),
+                    evidence.lastModifiedDate()
+                )
+            } else {
+                evidence
+            }
+        }
 
         // When
         val result = evidenceService.createEvidence(userId, title)
