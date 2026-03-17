@@ -14,6 +14,7 @@ import java.util.UUID;
 public class AssessmentEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Version

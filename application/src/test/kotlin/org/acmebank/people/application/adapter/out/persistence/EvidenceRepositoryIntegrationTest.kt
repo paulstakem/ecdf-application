@@ -47,7 +47,6 @@ class EvidenceRepositoryIntegrationTest {
         val savedUser = userRepository.save(user)
 
         val evidence = EvidenceEntity().apply {
-            id = java.util.UUID.randomUUID()
             this.user = savedUser
             title = "Delivered Project X"
             description = "Detailed description of project X"

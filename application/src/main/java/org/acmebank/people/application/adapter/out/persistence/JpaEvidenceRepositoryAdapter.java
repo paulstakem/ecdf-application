@@ -30,8 +30,13 @@ public class JpaEvidenceRepositoryAdapter implements EvidenceRepository {
         UserEntity userEntity = userJpaRepository.findById(evidence.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + evidence.userId()));
 
-        EvidenceEntity entity = evidenceJpaRepository.findById(evidence.id())
-                .orElse(new EvidenceEntity());
+        EvidenceEntity entity;
+        if (evidence.id() != null) {
+            entity = evidenceJpaRepository.findById(evidence.id())
+                    .orElse(new EvidenceEntity());
+        } else {
+            entity = new EvidenceEntity();
+        }
         
         DomainPersistenceMapper.updateEvidenceEntity(entity, evidence, userEntity);
         EvidenceEntity saved = evidenceJpaRepository.save(entity);

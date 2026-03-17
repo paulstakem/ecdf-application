@@ -30,18 +30,21 @@ public class JpaAssessmentRepositoryAdapter implements AssessmentRepository {
     public Assessment save(Assessment assessment) {
         java.util.Objects.requireNonNull(assessment.evidenceId(), "Evidence ID must not be null");
         java.util.Objects.requireNonNull(assessment.assessorId(), "Assessor ID must not be null");
-        java.util.Objects.requireNonNull(assessment.id(), "Assessment ID must not be null");
-
         EvidenceEntity evidenceEntity = evidenceJpaRepository.findById(assessment.evidenceId())
                 .orElseThrow(() -> new IllegalArgumentException("Evidence not found: " + assessment.evidenceId()));
 
         UserEntity assessorEntity = userJpaRepository.findById(assessment.assessorId())
                 .orElseThrow(() -> new IllegalArgumentException("Assessor not found: " + assessment.assessorId()));
 
-        // Try to find by assessment ID first, then by evidence ID (since it's unique)
-        AssessmentEntity entity = assessmentJpaRepository.findById(assessment.id())
-                .or(() -> assessmentJpaRepository.findByEvidenceId(assessment.evidenceId()))
-                .orElse(new AssessmentEntity());
+        AssessmentEntity entity;
+        if (assessment.id() != null) {
+            entity = assessmentJpaRepository.findById(assessment.id())
+                    .or(() -> assessmentJpaRepository.findByEvidenceId(assessment.evidenceId()))
+                    .orElse(new AssessmentEntity());
+        } else {
+            entity = assessmentJpaRepository.findByEvidenceId(assessment.evidenceId())
+                    .orElse(new AssessmentEntity());
+        }
 
         DomainPersistenceMapper.updateAssessmentEntity(entity, assessment, evidenceEntity, assessorEntity);
         AssessmentEntity saved = assessmentJpaRepository.save(entity);

@@ -14,6 +14,7 @@ import java.util.UUID;
 public class EvidenceEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Version

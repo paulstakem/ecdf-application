@@ -94,7 +94,9 @@ public class DomainPersistenceMapper {
     }
 
     public static void updateEvidenceEntity(EvidenceEntity entity, Evidence domain, UserEntity userEntity) {
-        entity.setId(domain.id());
+        if (domain.id() != null) {
+            entity.setId(domain.id());
+        }
         entity.setUser(userEntity);
         entity.setTitle(domain.title());
         entity.setDescription(domain.description());
@@ -157,7 +159,9 @@ public class DomainPersistenceMapper {
 
     public static void updateAssessmentEntity(AssessmentEntity entity, Assessment domain, EvidenceEntity evidenceEntity,
             UserEntity assessorEntity) {
-        entity.setId(domain.id());
+        if (domain.id() != null) {
+            entity.setId(domain.id());
+        }
         entity.setEvidence(evidenceEntity);
         entity.setAssessor(assessorEntity);
         entity.setReviewSummary(domain.reviewSummary());

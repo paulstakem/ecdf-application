@@ -62,8 +62,8 @@
   - [x] Implement UI flow for Manager to assign evidence to an Independent Technical Assessor (ITA)
   - [x] Implement `assessor-queue.html` listing evidence assigned to the current user
 - [ ] Check-In & Period Review (Quarterly):
-  - [ ] Write Controller tests and implement `CheckInController`
-  - [ ] Implement `checkin-form.html` for Managers to capture review notes and freeze the point-in-time aggregated scores
+  - [x] Write Controller tests and implement `CheckInController`
+  - [x] Implement `checkin-form.html` for Managers to capture review notes and freeze the point-in-time aggregated scores
 - [ ] Developer Pathways & PDP:
   - [ ] Write Controller tests and implement `FrameworkController` mapping roles to expected pillar scores
   - [ ] Write Controller tests and implement `PdpController`

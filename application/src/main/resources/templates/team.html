@@ -174,8 +174,9 @@
                                         </div>
                                     </td>
                                     
-                                    <td>
-                                        <a href="#" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">View Profile</a>
+                                    <td class="flex gap-2">
+                                        <a th:href="@{/checkins/user/{userId}(userId=${member.user.id})}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">History</a>
+                                        <a th:href="@{/checkins/new/{userId}(userId=${member.user.id})}" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Check-In</a>
                                     </td>
                                 </tr>
                             </tbody>

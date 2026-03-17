@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base.html}">
+<head>
+    <title th:text="${'Check-In History - ' + developer.fullName}">Check-In History</title>
+</head>
+<body>
+
+<main layout:fragment="content">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-1" th:text="${'Check-In History: ' + developer.fullName}">Check-In History</h1>
+            <p class="text-muted" th:text="${developer.grade.name}">Grade</p>
+        </div>
+        <div>
+            <a th:href="@{/checkins/new/{userId}(userId=${developer.id})}" class="btn btn-primary glow-effect shadow-sm">New Check-In</a>
+        </div>
+    </div>
+
+    <div class="card glassmorphism overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-darker border-b border-gray-700">
+                    <tr>
+                        <th class="p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                        <th class="p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Scores</th>
+                        <th class="p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Manager Notes</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <tr th:each="checkin : ${checkins}" class="hover:bg-gray-800/30 transition-colors">
+                        <td class="p-4" th:text="${#temporals.format(checkin.checkInDate, 'dd MMM yyyy')}">Date</td>
+                        <td class="p-4">
+                            <span class="badge" 
+                                  th:classappend="${checkin.status.name() == 'UNDERPERFORMING' ? 'badge-danger' : (checkin.status.name() == 'READY_FOR_PROMOTION' ? 'badge-success' : 'badge-info')}"
+                                  th:text="${checkin.status}">STATUS</span>
+                        </td>
+                        <td class="p-4">
+                            <div class="flex flex-wrap gap-1">
+                                <span th:each="entry : ${checkin.holisticScores}" class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700/50 text-gray-300 border border-gray-600">
+                                    <span th:text="${#strings.substring(entry.key, 0, 3)} + ': ' + ${entry.value.value}">KS: 3</span>
+                                </span>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm line-clamp-2 max-w-xs text-muted" th:text="${checkin.managerNotes}">Notes...</p>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(checkins)}">
+                        <td colspan="4" class="p-8 text-center text-muted italic">
+                            No check-in history found for this developer.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
