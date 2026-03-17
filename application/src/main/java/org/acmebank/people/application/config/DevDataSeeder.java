@@ -122,10 +122,38 @@ public class DevDataSeeder {
                     CheckInStatus status = email.equals("charlie@example.com") ? CheckInStatus.READY_FOR_PROMOTION : 
                                          (email.equals("user@example.com") ? CheckInStatus.UNDERPERFORMING : CheckInStatus.ON_TRACK);
                     
-                    checkInRepository.save(new CheckIn(null, engineer.id(), manager.id(), 
-                        LocalDate.now().minusMonths(3), LocalDate.now(), 
-                        expectations, "Quarterly review summary for " + engineer.fullName(), 
-                        status, LocalDate.now()));
+                }
+            }
+
+            // Seed evidence for the manager persona
+            if (evidenceRepository.findByUserId(manager.id()).isEmpty()) {
+                for (int i = 0; i < 2; i++) {
+                    Map<Pillar, Score> selfScores = new EnumMap<>(Pillar.class);
+                    Map<Pillar, Score> mgrScores = new EnumMap<>(Pillar.class);
+
+                    // Assign some pillars for manager evidence (covering different pillars than engineers)
+                    int startPillar = i * 4;
+                    for (int j = 0; j < 3; j++) {
+                        Pillar p = Pillar.values()[(startPillar + j) % Pillar.values().length];
+                        int scoreVal = 4 + random.nextInt(2); // Managers usually have higher scores (4-5)
+                        selfScores.put(p, new Score(scoreVal));
+                        mgrScores.put(p, new Score(scoreVal));
+                    }
+
+                    Evidence evidence = evidenceRepository.save(new Evidence(
+                        null, manager.id(),
+                        "Strategic Initiative: " + (i == 0 ? "Global Engineering Standardisation" : "Management Training Framework"),
+                        loremIpsum, loremIpsum, loremIpsum, loremIpsum,
+                        selfScores, Collections.emptyList(), Collections.emptyList(),
+                        EvidenceStatus.MANAGER_ASSESSED,
+                        LocalDate.now().minusMonths(i + 2), LocalDate.now().minusMonths(i + 2)
+                    ));
+
+                    assessmentRepository.save(new Assessment(
+                        null, evidence.id(), manager.id(), // Assessed by self or a peer for example purposes
+                        mgrScores, "Excellent strategic impact and leadership.",
+                        false, LocalDate.now().minusMonths(i + 2)
+                    ));
                 }
             }
         };
