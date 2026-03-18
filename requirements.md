@@ -9,6 +9,7 @@ This document outlines the business requirements for the Engineer Career Develop
   - *Technical (5)*: Defines, Designs, Delivers, Controls, Operates.
 - **Scoring**: 1 to 5 scale for each pillar, based on the **Dreyfus model of skill acquisition** (1=Novice, 2=Advanced Beginner, 3=Competent, 4=Proficient, 5=Expert).
 - **Roles, Grades & Expectations**: Different roles and grade levels will have different expected baseline scores for each of the 9 pillars.
+  - *Example Baseline*: A "Vice President" role defaults to an expectation of Level 3 across all pillars. A "Director" role defaults to an expectation of Level 4 across all pillars.
 
 ## 2. Evidence Submission
 - Employees submit "evidence" of their work (e.g., successful project delivery, mentorship).
@@ -26,6 +27,7 @@ This document outlines the business requirements for the Engineer Career Develop
 ## 3. Assessments & Review
 - Managers or assigned Third-Party Assessors review submitted evidence.
 - Assessors score the evidence against the applicable pillars (1-5).
+  - During assessment, the UI must default the assessor's scoring inputs to the exact rating submitted by the employee. If the employee did not select/rate a pillar, the default value must be a blank unselected entry.
 - Assessors must provide a Review Summary/feedback for the evidence submission.
 
 ## 4. Quarterly Check-ins & Holistic Rating
@@ -34,10 +36,12 @@ This document outlines the business requirements for the Engineer Career Develop
 - **Evidence Aging**: Evidence has a rolling validity period (e.g., 3 years). Evidence older than this is excluded from the aggregated holistic rating.
 - The manager adds formal review notes during the Check-in.
 - The aggregated rating is compared against the target grade expectations.
+  - The check-in UI must explicitly display the full names of the pillars, the expected pillar grades, and the actual aggregated scores.
 - **Outcomes**: Based on the Check-in, the employee's status is categorized as:
   - *Ready for Promotion*: Consistently meeting/exceeding expectations for the *next* grade. **Crucially, for someone to be considered "Ready for Promotion", their evidence MUST have been independently assessed by a Third-Party who is certified as an Independent Technical Assessor (ITA).**
-  - *On Track*: Meeting expectations for the *current* grade.
-  - *Underperforming*: Falling below expectations for the *current* grade.
+  - *Over Performing*: Triggered when the employee is assessing above their pillar expectations for **more than three** pillars.
+  - *On Track*: Meeting expectations for the *current* grade, falling between under and over performing thresholds.
+  - *Underperforming*: Triggered when the employee has **more than three** pillars not meeting the minimum threshold for their grade.
 
 ## 5. Personal Development Plan (PDP)
 - Tied to a Check-in.
@@ -63,3 +67,9 @@ This document outlines the business requirements for the Engineer Career Develop
 - Glassmorphism elements.
 - Modern typography.
 - Built-in data visualization (e.g., radar charts) to compare holistic scores against grade expectations.
+
+## 8. Development & Sample Data
+- All pre-seeded sample data used for testing and demonstrations must represent a realistic functional history.
+- The dates for seeded evidence must range sequentially over a **two year** period.
+- Pre-seeded check-in records must also span that same two-year periodic history.
+- All seeded sample data (evidence, check-ins, assessments) must be **at least three months old** relative to the date of execution to validate historical and aging logic.

@@ -38,6 +38,7 @@
 - [x] Implement `CheckInService` to pass tests
 - [x] Write Unit Tests for `PdpService` (Mandatory creation for underperforming pillars, linking to learning journeys)
 - [x] Implement `PdpService` to pass tests
+- [x] Implement domain logic for Grade target expectations and enhanced CheckInStatus resolution (>3 pillars threshold)
 
 ## 4. UI Layer (Spring MVC Controllers & Views - Kotlin WebMvcTests)
 
@@ -56,14 +57,16 @@
   - [x] Implement `evidence-list.html`
   - [x] Implement `evidence-form.html` (Engineers select applicable pillars and self-rate; provide Impact, Complexity, Contribution)
   - [x] Implement secure file download endpoint for attachments
-- [ ] Evidence Assessment & 3rd-Party Workflow:
+- [x] Evidence Assessment & 3rd-Party Workflow:
   - [x] Write Controller tests and implement `AssessmentController`
   - [x] Implement `assessment-form.html` (for Managers/ITAs) with independent pillar scoring and Review Summary
+  - [x] Dynamically default assessor rating dropdowns to the developer's self-assessed rating
   - [x] Implement UI flow for Manager to assign evidence to an Independent Technical Assessor (ITA)
   - [x] Implement `assessor-queue.html` listing evidence assigned to the current user
-- [ ] Check-In & Period Review (Quarterly):
+- [x] Check-In & Period Review (Quarterly):
   - [x] Write Controller tests and implement `CheckInController`
   - [x] Implement `checkin-form.html` for Managers to capture review notes and freeze the point-in-time aggregated scores
+  - [x] Surface Grade expectations, full pillar names, and actual scores visually within the Check-In UI
 - [ ] Developer Pathways & PDP:
   - [ ] Write Controller tests and implement `FrameworkController` mapping roles to expected pillar scores
   - [ ] Write Controller tests and implement `PdpController`
@@ -71,6 +74,7 @@
 
 ## 5. Polish & Verification
 
+- [x] Implement realistic historical demo data seeding in `DevDataSeeder` (spanning a 2-year history, ensuring items are 3+ months old)
 - [ ] Refine visual design (glassmorphism details, animations, responsive layout)
 - [ ] Perform manual end-to-end verification
 - [ ] Generate `walkthrough.md` documenting implemented flows
