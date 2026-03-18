@@ -36,47 +36,12 @@ public class CheckInService {
 
     public CheckIn createCheckIn(UUID userId, UUID managerId, String managerNotes, Grade targetGrade) {
         LocalDate now = LocalDate.now();
-        LocalDate threeYearsAgo = now.minusYears(3);
-
-        List<Evidence> assessedEvidence = new java.util.ArrayList<>(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED));
-        assessedEvidence.addAll(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED));
-
-        Map<Pillar, Score> aggregatedScores = new EnumMap<>(Pillar.class);
-        boolean hasItaAssessment = false;
-
-        for (Evidence evidence : assessedEvidence) {
-            // Check evidence aging rule
-            if (evidence.createdDate().isBefore(threeYearsAgo)) {
-                continue;
-            }
-
-            Optional<Assessment> assessmentOpt = assessmentRepository.findByEvidenceId(evidence.id());
-            if (assessmentOpt.isPresent()) {
-                Assessment assessment = assessmentOpt.get();
-
-                if (assessment.assessmentDate() != null && assessment.assessmentDate().isBefore(threeYearsAgo)) {
-                    continue;
-                }
-
-                if (assessment.isThirdParty()) {
-                    hasItaAssessment = true;
-                }
-
-                // Aggregate highest score for each pillar
-                if (assessment.assessedScores() != null) {
-                    for (Map.Entry<Pillar, Score> entry : assessment.assessedScores().entrySet()) {
-                        Pillar pillar = entry.getKey();
-                        Score currentScore = entry.getValue();
-                        Score existingScore = aggregatedScores.get(pillar);
-
-                        if (existingScore == null || currentScore.value() > existingScore.value()) {
-                            aggregatedScores.put(pillar, currentScore);
-                        }
-                    }
-                }
-            }
-        }
-
+        
+        Map<Pillar, Score> aggregatedScores = getAggregatedScores(userId);
+        
+        // Note: hasItaAssessment check needs to be refactored or kept here
+        // For simplicity, let's keep the existing logic and just use it to evaluate status.
+        boolean hasItaAssessment = checkHasItaAssessment(userId);
         CheckInStatus status = evaluateStatus(aggregatedScores, targetGrade, hasItaAssessment);
 
         CheckIn checkIn = new CheckIn(
@@ -94,8 +59,62 @@ public class CheckInService {
         return checkInRepository.save(checkIn);
     }
 
+    private boolean checkHasItaAssessment(UUID userId) {
+        LocalDate threeYearsAgo = LocalDate.now().minusYears(3);
+        List<Evidence> assessedEvidence = new java.util.ArrayList<>(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED));
+        assessedEvidence.addAll(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED));
+        
+        for (Evidence evidence : assessedEvidence) {
+            if (evidence.createdDate().isBefore(threeYearsAgo)) continue;
+            Optional<Assessment> assessmentOpt = assessmentRepository.findByEvidenceId(evidence.id());
+            if (assessmentOpt.isPresent()) {
+                Assessment assessment = assessmentOpt.get();
+                if (assessment.assessmentDate() != null && assessment.assessmentDate().isBefore(threeYearsAgo)) continue;
+                if (assessment.isThirdParty()) return true;
+            }
+        }
+        return false;
+    }
+
+    public Map<Pillar, Score> getAggregatedScores(UUID userId) {
+        LocalDate threeYearsAgo = LocalDate.now().minusYears(3);
+        List<Evidence> assessedEvidence = new java.util.ArrayList<>(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED));
+        assessedEvidence.addAll(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED));
+
+        Map<Pillar, Score> aggregatedScores = new EnumMap<>(Pillar.class);
+
+        for (Evidence evidence : assessedEvidence) {
+            if (evidence.createdDate().isBefore(threeYearsAgo)) {
+                continue;
+            }
+
+            Optional<Assessment> assessmentOpt = assessmentRepository.findByEvidenceId(evidence.id());
+            if (assessmentOpt.isPresent()) {
+                Assessment assessment = assessmentOpt.get();
+
+                if (assessment.assessmentDate() != null && assessment.assessmentDate().isBefore(threeYearsAgo)) {
+                    continue;
+                }
+
+                if (assessment.assessedScores() != null) {
+                    for (Map.Entry<Pillar, Score> entry : assessment.assessedScores().entrySet()) {
+                        Pillar pillar = entry.getKey();
+                        Score currentScore = entry.getValue();
+                        Score existingScore = aggregatedScores.get(pillar);
+
+                        if (existingScore == null || currentScore.value() > existingScore.value()) {
+                            aggregatedScores.put(pillar, currentScore);
+                        }
+                    }
+                }
+            }
+        }
+        return aggregatedScores;
+    }
+
     private CheckInStatus evaluateStatus(Map<Pillar, Score> aggregatedScores, Grade targetGrade, boolean hasItaAssessment) {
-        boolean meetsAllExpectations = true;
+        int belowExpectationsCount = 0;
+        int aboveExpectationsCount = 0;
 
         for (Map.Entry<Pillar, Score> entry : targetGrade.expectations().entrySet()) {
             Pillar pillar = entry.getKey();
@@ -103,16 +122,21 @@ public class CheckInService {
             Score actual = aggregatedScores.get(pillar);
 
             if (actual == null || actual.value() < expected.value()) {
-                meetsAllExpectations = false;
-                break;
+                belowExpectationsCount++;
+            } else if (actual.value() > expected.value()) {
+                aboveExpectationsCount++;
             }
         }
 
-        if (!meetsAllExpectations) {
+        if (belowExpectationsCount > 3) {
             return CheckInStatus.UNDERPERFORMING;
         }
 
-        if (hasItaAssessment) {
+        if (aboveExpectationsCount > 3) {
+            return CheckInStatus.OVER_PERFORMING;
+        }
+
+        if (hasItaAssessment && belowExpectationsCount == 0) {
             return CheckInStatus.READY_FOR_PROMOTION;
         }
 

@@ -49,8 +49,11 @@
                 <!-- Mini Score Legend -->
                 <div class="grid grid-cols-1 gap-2">
                     <div th:each="pillar : ${pillars}" class="flex justify-between items-center text-sm p-2 rounded-md border border-gray-700/50 bg-gray-800/20">
-                        <span th:text="${#strings.substring(pillar, 0, 3)} + '...'" title="${pillar}">PILLAR</span>
-                        <span class="font-bold text-primary">N/A</span>
+                        <span th:text="${pillar.name()}" class="font-medium text-gray-300">PILLAR NAME</span>
+                        <div class="flex space-x-4 text-xs">
+                            <span class="text-blue-400" title="Expected level based on current grade">Target: <span class="font-bold" th:text="${developer.getExpectedPillarLevel(pillar).value()}">N/A</span></span>
+                            <span class="text-primary" title="Highest assessor score in last 3 years">Actual: <span class="font-bold" th:text="${actualScores.containsKey(pillar) ? actualScores.get(pillar).value() : 0}">0</span></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -75,7 +78,12 @@
             const ctx = document.getElementById('scoreRadarChart');
             if(ctx) {
                 const labels = /*[[${pillars}]]*/ [];
-                const data = labels.map(() => 0); // Placeholder data for now
+                const actualScores = /*[[${actualScores}]]*/ {};
+                
+                const data = labels.map(p => {
+                    const scoreObj = actualScores[p];
+                    return scoreObj ? scoreObj.value : 0;
+                });
                 
                 // Format label names
                 const formattedLabels = labels.map(label => {

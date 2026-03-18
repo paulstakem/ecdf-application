@@ -73,11 +73,12 @@ class CheckInControllerTest {
     fun `should show new check-in form`() {
         `when`(userRepository.findById(userId)).thenReturn(Optional.of(mockUser))
         `when`(gradeRepository.findAll()).thenReturn(emptyList())
+        `when`(checkInService.getAggregatedScores(userId)).thenReturn(emptyMap())
 
         mockMvc.perform(get("/checkins/new/$userId"))
             .andExpect(status().isOk)
             .andExpect(view().name("checkin-form"))
-            .andExpect(model().attributeExists("developer", "grades", "pillars"))
+            .andExpect(model().attributeExists("developer", "grades", "pillars", "actualScores"))
     }
 
     @Test

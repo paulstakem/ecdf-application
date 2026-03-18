@@ -34,32 +34,103 @@ class CheckInServiceTest {
     private lateinit var checkInService: CheckInService
 
     @Test
-    fun `should evaluate as UNDERPERFORMING if any pillar expectation is not met`() {
+    fun `should evaluate as UNDERPERFORMING if MORE THAN THREE pillars do not meet expectations`() {
         // Given
         val userId = UUID.randomUUID()
         val managerId = UUID.randomUUID()
         val targetGrade = Grade(UUID.randomUUID(), "Senior", "Developer", mapOf(
             Pillar.THINKS to Score(4),
-            Pillar.DELIVERS to Score(4)
+            Pillar.ENGAGES to Score(4),
+            Pillar.INFLUENCES to Score(4),
+            Pillar.ACHIEVES to Score(4)
         ))
 
-        // Evidence 1 covering THINKS (Score: 3 - Below expectation 4)
-        val evidence1Id = UUID.randomUUID()
-        val evidence1 = createEvidence(userId, evidence1Id, LocalDate.now())
-        val assessment1 = createAssessment(evidence1Id, mapOf(Pillar.THINKS to Score(3)), false)
+        // Evidence covers 4 pillars, all below expectation
+        val evidenceId = UUID.randomUUID()
+        val evidence = createEvidence(userId, evidenceId, LocalDate.now())
+        val assessment = createAssessment(evidenceId, mapOf(
+            Pillar.THINKS to Score(3),
+            Pillar.ENGAGES to Score(3),
+            Pillar.INFLUENCES to Score(3),
+            Pillar.ACHIEVES to Score(3)
+        ), false)
 
-        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence1))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence))
         lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
-        lenient().`when`(assessmentRepository.findByEvidenceId(evidence1Id)).thenReturn(Optional.of(assessment1))
+        lenient().`when`(assessmentRepository.findByEvidenceId(evidenceId)).thenReturn(Optional.of(assessment))
         lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
 
         // When
-        val checkIn = checkInService.createCheckIn(userId, managerId, "Needs improvement in Thinks", targetGrade)
+        val checkIn = checkInService.createCheckIn(userId, managerId, "Needs improvement", targetGrade)
 
         // Then
         checkIn.status shouldBe CheckInStatus.UNDERPERFORMING
-        checkIn.managerNotes shouldBe "Needs improvement in Thinks"
-        verify(checkInRepository).save(any(CheckIn::class.java))
+    }
+
+    @Test
+    fun `should evaluate as ON_TRACK if exactly THREE pillars or fewer do not meet expectations`() {
+        // Given
+        val userId = UUID.randomUUID()
+        val managerId = UUID.randomUUID()
+        val targetGrade = Grade(UUID.randomUUID(), "Senior", "Developer", mapOf(
+            Pillar.THINKS to Score(4),
+            Pillar.ENGAGES to Score(4),
+            Pillar.INFLUENCES to Score(4)
+        ))
+
+        // 3 pillars below expectations
+        val evidenceId = UUID.randomUUID()
+        val evidence = createEvidence(userId, evidenceId, LocalDate.now())
+        val assessment = createAssessment(evidenceId, mapOf(
+            Pillar.THINKS to Score(3),
+            Pillar.ENGAGES to Score(3),
+            Pillar.INFLUENCES to Score(3)
+        ), false)
+
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
+        lenient().`when`(assessmentRepository.findByEvidenceId(evidenceId)).thenReturn(Optional.of(assessment))
+        lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
+
+        // When
+        val checkIn = checkInService.createCheckIn(userId, managerId, "OK", targetGrade)
+
+        // Then
+        checkIn.status shouldBe CheckInStatus.ON_TRACK
+    }
+
+    @Test
+    fun `should evaluate as OVER_PERFORMING if MORE THAN THREE pillars exceed expectations`() {
+        // Given
+        val userId = UUID.randomUUID()
+        val managerId = UUID.randomUUID()
+        val targetGrade = Grade(UUID.randomUUID(), "Senior", "Developer", mapOf(
+            Pillar.THINKS to Score(3),
+            Pillar.ENGAGES to Score(3),
+            Pillar.INFLUENCES to Score(3),
+            Pillar.ACHIEVES to Score(3)
+        ))
+
+        // 4 pillars above expectations
+        val evidenceId = UUID.randomUUID()
+        val evidence = createEvidence(userId, evidenceId, LocalDate.now())
+        val assessment = createAssessment(evidenceId, mapOf(
+            Pillar.THINKS to Score(4),
+            Pillar.ENGAGES to Score(4),
+            Pillar.INFLUENCES to Score(4),
+            Pillar.ACHIEVES to Score(4)
+        ), false)
+
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.MANAGER_ASSESSED)).thenReturn(listOf(evidence))
+        lenient().`when`(evidenceRepository.findByUserIdAndStatus(userId, EvidenceStatus.ASSESSED)).thenReturn(emptyList())
+        lenient().`when`(assessmentRepository.findByEvidenceId(evidenceId)).thenReturn(Optional.of(assessment))
+        lenient().`when`(checkInRepository.save(any(CheckIn::class.java))).thenAnswer { it.getArgument(0) }
+
+        // When
+        val checkIn = checkInService.createCheckIn(userId, managerId, "Great job", targetGrade)
+
+        // Then
+        checkIn.status shouldBe CheckInStatus.OVER_PERFORMING
     }
 
     @Test
@@ -142,8 +213,9 @@ class CheckInServiceTest {
         val checkIn = checkInService.createCheckIn(userId, managerId, "Old evidence", targetGrade)
 
         // Then
-        // Since the old evidence is excluded, they have NO scores, meaning they don't meet expectation of 3
-        checkIn.status shouldBe CheckInStatus.UNDERPERFORMING
+        // Without old evidence, they have 0 expectations met for THINKS, which is 1 missing pillar.
+        // But 1 missing pillar is <= 3, so they are ON_TRACK (or not underperforming).
+        checkIn.status shouldBe CheckInStatus.ON_TRACK
         checkIn.holisticScores.isEmpty() shouldBe true
     }
 

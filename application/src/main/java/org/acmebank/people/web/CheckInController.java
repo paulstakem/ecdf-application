@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -49,9 +50,12 @@ public class CheckInController {
         User developer = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
+        Map<Pillar, Score> actualScores = checkInService.getAggregatedScores(userId);
+
         model.addAttribute("developer", developer);
         model.addAttribute("grades", gradeRepository.findAll());
         model.addAttribute("pillars", Pillar.values());
+        model.addAttribute("actualScores", actualScores);
         return "checkin-form";
     }
 

@@ -120,13 +120,15 @@ public class DevDataSeeder {
                         // Make the first evidence SUBMITTED (Draft state for assessment)
                         EvidenceStatus status = (i == 0) ? EvidenceStatus.SUBMITTED : EvidenceStatus.MANAGER_ASSESSED;
 
+                        int monthsAgo = 3 + (i * 5); // 3, 8, 13, 18 months ago -> ranges up to ~2 years, all at least 3 months
+
                         Evidence evidence = evidenceRepository.save(new Evidence(
                             null, engineer.id(), 
                             "Project " + (char)('A' + i + 1) + " Implementation",
                             loremIpsum, loremIpsum, loremIpsum, loremIpsum,
                             selfScores, Collections.emptyList(), Collections.emptyList(),
                             status,
-                            LocalDate.now().minusMonths(i + 1), LocalDate.now().minusMonths(i + 1)
+                            LocalDate.now().minusMonths(monthsAgo), LocalDate.now().minusMonths(monthsAgo)
                         ));
 
                         // Only save assessment if status is MANAGER_ASSESSED
@@ -134,21 +136,26 @@ public class DevDataSeeder {
                             assessmentRepository.save(new Assessment(
                                 null, evidence.id(), manager.id(),
                                 mgrScores, "Assessed based on project outcomes.",
-                                false, LocalDate.now().minusMonths(i + 1)
+                                false, LocalDate.now().minusMonths(monthsAgo)
                             ));
                         }
                     }
                 }
 
-                // Seed Check-In if missing
+                // Seed Check-Ins to show a history over the same two year period
                 if (checkInRepository.findByUserId(engineer.id()).isEmpty()) {
-                    CheckInStatus status = email.equals("charlie@example.com") ? CheckInStatus.READY_FOR_PROMOTION : 
-                                         (email.equals("user@example.com") ? CheckInStatus.UNDERPERFORMING : CheckInStatus.ON_TRACK);
-                    
-                    checkInRepository.save(new CheckIn(null, engineer.id(), manager.id(), 
-                        LocalDate.now().minusMonths(3), LocalDate.now(), 
-                        vpExpectations, "Quarterly review summary for " + engineer.fullName(), 
-                        status, LocalDate.now()));
+                    for (int i = 0; i < 4; i++) { // Generate 4 checkins
+                        int monthsAgo = 3 + (i * 6); // 3, 9, 15, 21 months ago
+                        
+                        CheckInStatus status = email.equals("charlie@example.com") ? CheckInStatus.READY_FOR_PROMOTION : 
+                                             (email.equals("user@example.com") ? CheckInStatus.UNDERPERFORMING : CheckInStatus.ON_TRACK);
+                        
+                        checkInRepository.save(new CheckIn(null, engineer.id(), manager.id(), 
+                            LocalDate.now().minusMonths(monthsAgo + 3), // period start
+                            LocalDate.now().minusMonths(monthsAgo), // period end
+                            vpExpectations, "Quarterly review summary for " + engineer.fullName(), 
+                            status, LocalDate.now().minusMonths(monthsAgo))); // check-in date
+                    }
                 }
             }
 
@@ -166,6 +173,8 @@ public class DevDataSeeder {
                         selfScores.put(p, new Score(scoreVal));
                         mgrScores.put(p, new Score(scoreVal));
                     }
+                    
+                    int monthsAgo = 3 + (i * 12); // 3, 15 months ago
 
                     Evidence evidence = evidenceRepository.save(new Evidence(
                         null, manager.id(),
@@ -173,13 +182,13 @@ public class DevDataSeeder {
                         loremIpsum, loremIpsum, loremIpsum, loremIpsum,
                         selfScores, Collections.emptyList(), Collections.emptyList(),
                         EvidenceStatus.MANAGER_ASSESSED,
-                        LocalDate.now().minusMonths(i + 2), LocalDate.now().minusMonths(i + 2)
+                        LocalDate.now().minusMonths(monthsAgo), LocalDate.now().minusMonths(monthsAgo)
                     ));
 
                     assessmentRepository.save(new Assessment(
                         null, evidence.id(), manager.id(), // Assessed by self or a peer for example purposes
                         mgrScores, "Excellent strategic impact and leadership.",
-                        false, LocalDate.now().minusMonths(i + 2)
+                        false, LocalDate.now().minusMonths(monthsAgo)
                     ));
                 }
             }
