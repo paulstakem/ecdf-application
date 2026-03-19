@@ -57,6 +57,38 @@
                 <a href="/evidence" class="text-sm text-primary hover:underline glow-text">View all evidence &rarr;</a>
             </div>
         </div>
+        </div>
+    </div>
+
+    <!-- Historical Check-Ins -->
+    <div class="mt-8 mb-6">
+        <div class="card glassmorphism p-6 flex flex-col">
+            <h2 class="text-xl font-semibold mb-4 text-glow">Check-In History</h2>
+            
+            <div th:if="${#lists.isEmpty(historicalCheckIns)}" class="text-center p-8 text-muted">
+                <p>No formal check-ins have been recorded yet.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(historicalCheckIns)}" class="flex flex-col gap-4">
+                <div th:each="checkIn : ${historicalCheckIns}" class="p-5 rounded-md border border-gray-700 hover:border-gray-500 transition-colors bg-darker shadow-inner flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-medium text-lg text-white">
+                                <span th:text="${#temporals.format(checkIn.periodStartDate, 'MMM yyyy')}">Start</span> 
+                                &rarr; 
+                                <span th:text="${#temporals.format(checkIn.periodEndDate, 'MMM yyyy')}">End</span>
+                            </h3>
+                            <span class="badge" th:classappend="${checkIn.status.name() == 'UNDERPERFORMING' ? 'badge-error' : (checkIn.status.name() == 'OVER_PERFORMING' ? 'badge-success' : 'badge-info')}" th:text="${checkIn.status}">STATUS</span>
+                        </div>
+                        <p class="text-sm text-gray-400" th:text="${checkIn.managerNotes}">Manager's summary notes...</p>
+                    </div>
+                    <div class="text-left md:text-right shrink-0">
+                        <div class="text-xs text-gray-500">Recorded on</div>
+                        <div class="text-sm font-medium" th:text="${#temporals.format(checkIn.checkInDate, 'dd MMM yyyy')}">Date</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Chart.js configuration script -->

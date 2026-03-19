@@ -45,9 +45,10 @@ public class DashboardController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         List<CheckIn> checkIns = checkInRepository.findByUserId(user.id());
-        CheckIn latestCheckIn = checkIns.stream()
-                .max(Comparator.comparing(CheckIn::checkInDate))
-                .orElse(null);
+        List<CheckIn> sortedCheckIns = checkIns.stream()
+                .sorted(Comparator.comparing(CheckIn::checkInDate).reversed())
+                .toList();
+        CheckIn latestCheckIn = sortedCheckIns.isEmpty() ? null : sortedCheckIns.get(0);
 
         List<Evidence> recentEvidence = evidenceRepository.findByUserId(user.id()).stream()
                 .sorted(Comparator.comparing(Evidence::createdDate).reversed())
@@ -56,6 +57,7 @@ public class DashboardController {
 
         model.addAttribute("user", user);
         model.addAttribute("latestCheckIn", latestCheckIn);
+        model.addAttribute("historicalCheckIns", sortedCheckIns);
         model.addAttribute("recentEvidence", recentEvidence);
 
         List<String> radarLabels = new ArrayList<>();

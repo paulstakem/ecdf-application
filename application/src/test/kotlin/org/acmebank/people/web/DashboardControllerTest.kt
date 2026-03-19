@@ -72,13 +72,14 @@ class DashboardControllerTest {
         mockMvc.perform(get("/dashboard"))
             .andExpect(status().isOk)
             .andExpect(view().name("dashboard"))
-            .andExpect(model().attributeExists("user", "latestCheckIn", "recentEvidence", "radarLabels", "radarData"))
+            .andExpect(model().attributeExists("user", "latestCheckIn", "historicalCheckIns", "recentEvidence", "radarLabels", "radarData"))
             .andDo { result ->
                 val modelAndView = result.modelAndView
                 modelAndView.shouldNotBeNull()
                 val model = modelAndView.model
                 model["user"] shouldBe mockUser
                 model["latestCheckIn"] shouldBe mockCheckIn
+                model["historicalCheckIns"] shouldBe listOf(mockCheckIn)
                 model["recentEvidence"] shouldBe listOf(mockEvidence)
             }
     }
