@@ -16,7 +16,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Application Service Layer' (Protocol in workflow.md)
 
 ## Phase 3: Web Layer (Controllers and Views)
-- [ ] Task: Implement `AssessorController` for viewing the queue and submitting reviews
+- [~] Task: Implement `AssessorController` for viewing the queue and submitting reviews
     - [ ] Write Tests: Add `@WebMvcTest` for `AssessorController`
     - [ ] Implement Feature: Create controller endpoints
 - [ ] Task: Create Thymeleaf view `assessor-queue.html`
