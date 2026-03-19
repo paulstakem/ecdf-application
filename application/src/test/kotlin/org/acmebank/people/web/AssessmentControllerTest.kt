@@ -76,7 +76,7 @@ class AssessmentControllerTest {
     fun `should submit assessment and redirect to queue`() {
         `when`(userRepository.findByEmail("mgr@example.com")).thenReturn(Optional.of(mockAssessor))
         `when`(assessmentService.submitAssessment(any(), any(), any(), any()))
-            .thenReturn(Assessment(UUID.randomUUID(), evidenceId, assessorId, emptyMap(), "Good", false, LocalDate.now()))
+            .thenReturn(Assessment(UUID.randomUUID(), evidenceId, assessorId, mapOf(Pillar.DESIGNS to Score(4)), "Good", false, LocalDate.now()))
 
         mockMvc.perform(
             post("/assessment/$evidenceId")
