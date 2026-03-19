@@ -9,11 +9,11 @@
     - [x] Implement Feature: Add query methods to repository
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Domain and Persistence Layer' (Protocol in workflow.md)
 
-## Phase 2: Application Service Layer
+## Phase 2: Application Service Layer [checkpoint: 9eef624]
 - [x] Task: Implement `AssessmentService` methods for ITA queue and scoring 9088767
     - [x] Write Tests: Add Mockito unit tests for `AssessmentService`
     - [x] Implement Feature: Add `getPendingAssessmentsForITA` and `submitITAAssessment` methods
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Application Service Layer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Application Service Layer' (Protocol in workflow.md)
 
 ## Phase 3: Web Layer (Controllers and Views)
 - [ ] Task: Implement `AssessorController` for viewing the queue and submitting reviews
