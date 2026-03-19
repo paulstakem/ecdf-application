@@ -19,10 +19,10 @@
 - [x] Task: Implement `AssessorController` for viewing the queue and submitting reviews 18fcc74
     - [x] Write Tests: Add `@WebMvcTest` for `AssessorController`
     - [x] Implement Feature: Create controller endpoints
-- [~] Task: Create Thymeleaf view `assessor-queue.html`
-    - [ ] Write Tests: Verify view rendering (if applicable)
-    - [ ] Implement Feature: Build HTML template with Vanilla CSS
-- [ ] Task: Create Thymeleaf view `assessment-form.html`
+- [x] Task: Create Thymeleaf view `assessor-queue.html`
+    - [x] Write Tests: Verify view rendering (if applicable)
+    - [x] Implement Feature: Build HTML template with Vanilla CSS
+- [~] Task: Create Thymeleaf view `assessment-form.html`
     - [ ] Write Tests: Verify form binding and validation
     - [ ] Implement Feature: Build HTML template with blank disabled `<option>` placeholders
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Web Layer (Controllers and Views)' (Protocol in workflow.md)
