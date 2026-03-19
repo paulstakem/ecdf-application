@@ -1,13 +1,13 @@
 # Implementation Plan: Implement Independent Technical Assessor (ITA) Review Workflow
 
-## Phase 1: Domain and Persistence Layer
+## Phase 1: Domain and Persistence Layer [checkpoint: 5e89aa8]
 - [x] Task: Create or update Domain entity `Assessment` to support ITA workflows 6099a55
     - [x] Write Tests: Add unit tests for `Assessment` entity logic
     - [x] Implement Feature: Update `Assessment` class
 - [x] Task: Update `AssessmentJpaRepository` for retrieving pending ITA reviews 2cc177b
     - [x] Write Tests: Add `@DataJpaTest` for new repository queries
     - [x] Implement Feature: Add query methods to repository
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Domain and Persistence Layer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Domain and Persistence Layer' (Protocol in workflow.md)
 
 ## Phase 2: Application Service Layer
 - [ ] Task: Implement `AssessmentService` methods for ITA queue and scoring
