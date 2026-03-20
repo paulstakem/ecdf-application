@@ -2,7 +2,7 @@
 
 ## Backend
 - **Language**: Java 21 (with Kotlin strictly for unit testing)
-- **Framework**: Spring Boot 3.4.x (Web, Data JPA, Security, Validation)
+- **Framework**: Spring Boot 3.5.x (Web, Data JPA, Security, Validation)
 - **Architecture**: Hexagonal (Ports & Adapters) Architecture
 
 ## Database
