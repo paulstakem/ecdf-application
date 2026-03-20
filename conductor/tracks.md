@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix Thymeleaf Fragment Expressions in templates**
+- [x] **Track: Fix Thymeleaf Fragment Expressions in templates**
 *Link: [./tracks/thymeleaf_fragment_fix_20260320/](./tracks/thymeleaf_fragment_fix_20260320/)*
