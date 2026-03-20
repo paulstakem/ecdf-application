@@ -2,7 +2,7 @@
 
 ## Phase 1: Update Dependencies
 - [x] Task: Update Spring Boot version to `3.5.12` in `gradle/libs.versions.toml` 259d79b
-- [ ] Task: Review and update all other dependencies (Kotlin, Mockito, Testcontainers, Spring Cloud, etc.) to their latest compatible versions in `gradle/libs.versions.toml`
+- [x] Task: Review and update all other dependencies (Kotlin, Mockito, Testcontainers, Spring Cloud, etc.) to their latest compatible versions in `gradle/libs.versions.toml` 5dc331d
 - [ ] Task: Reload Gradle configuration and run `./gradlew clean build -x test` to verify the project compiles with new dependencies
 - [ ] Task: Conductor - User Manual Verification 'Update Dependencies' (Protocol in workflow.md)
 
